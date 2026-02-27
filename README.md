@@ -80,8 +80,8 @@ The application runs directly in modern browsers:
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/Flapjacode/Esp32-Sim-Tool.git
-cd Esp32-Sim-Tool
+git clone https://github.com/flapjacode/esp32-simulator.git
+cd esp32-simulator
 ```
 
 2. Install dependencies (if using Node.js server):
@@ -121,7 +121,7 @@ http://localhost:3000
 ## Project Structure
 
 ```
-Esp32-Sim-Tool/
+esp32-simulator/
 ├── index.html          # Main application file
 ├── README.md           # Project documentation
 ├── assets/             # Static assets (CSS, JS, images)
@@ -192,7 +192,7 @@ Documentation used with attribution for educational and reference purposes.
 
 ## License
 
-<a href="https://flapjacode.github.io/Esp32-Sim-Tool/">ESP32 IDE SimTool</a> © 2025 by <a href="https://github.com/Flapjacode">Matthew Shannon</a> is licensed under <a href="https://creativecommons.org/licenses/by/4.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer">Creative Commons Attribution 4.0 International</a> <img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1" alt=""><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1" alt="">
+<a href="https://flapjacode.github.io/esp32-simulator/">ESP32 IDE SimTool</a> © 2025 by <a href="https://github.com/Flapjacode">Matthew Shannon</a> is licensed under <a href="https://creativecommons.org/licenses/by/4.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer">Creative Commons Attribution 4.0 International</a> <img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1" alt=""><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1" alt="">
 
 ### License Summary
 
