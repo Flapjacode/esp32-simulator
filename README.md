@@ -76,6 +76,27 @@ The application runs directly in modern browsers:
 1. Open `index.html` in your preferred browser
 2. Start configuring your ESP32 pins
 
+## Pinout References
+<p align="center">
+  <img src="images/logo.png" alt="Project Logo" width="300" style="background-color: white; padding: 15px;">
+</p>
+
+## Board Pinouts
+
+### ESP32-C3 Super Mini
+
+
+![ESP32-C3 Pinout](images/esp32-c3-pinout.png)
+
+
+
+### ESP32 WROOM
+
+
+![ESP32 WROOM Pinout](images/esp32-wroom-pinout.png)
+
+
+
 ### Development Setup
 
 1. Clone the repository:
