@@ -11,7 +11,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>ESP32 Simulator</h1>
+            <h1>🔧 ESP32 Simulator</h1>
             <p>Configure pins, write code, and test without hardware</p>
             <!-- Board selector will be dynamically inserted here by JavaScript -->
         </div>
@@ -19,7 +19,7 @@
         <div class="main-grid">
             <!-- Left Panel: Pin Configuration -->
             <div class="panel">
-                <h2>ESP32 Pin Configuration</h2>
+                <h2>📌 ESP32 Pin Configuration</h2>
                 <div class="esp32-diagram" id="pinDiagram">
                     <!-- Pins will be generated dynamically by JavaScript -->
                 </div>
@@ -30,7 +30,7 @@
 
             <!-- Right Panel: Code Editor -->
             <div class="panel">
-                <h2>Arduino Code</h2>
+                <h2>💻 Arduino Code</h2>
                 <textarea 
                     class="code-editor" 
                     id="codeEditor" 
@@ -48,19 +48,13 @@ void loop() {
                 ></textarea>
                 <div class="action-buttons">
                     <button class="btn btn-primary" onclick="validateCode()" title="Check code for errors">
-                        Validate Code
+                        ✓ Validate Code
                     </button>
                     <button class="btn btn-secondary" onclick="generateTemplate()" title="Generate code template from pin configuration">
-                        Generate Template
-                    </button>
-                    <button class="btn btn-success" onclick="saveCodeToFile()" title="Save code to .ino file">
-                        Save File
-                    </button>
-                    <button class="btn btn-warning" onclick="flashToESP32()" title="Flash code to ESP32 via Web Serial">
-                        Flash to ESP32
+                        ⚡ Generate Template
                     </button>
                     <button class="btn btn-secondary" onclick="clearCode()" title="Clear code editor">
-                        Clear
+                        🗑️ Clear
                     </button>
                 </div>
             </div>

@@ -115,179 +115,9 @@ const boardDefinitions = {
     }
 };
 
-// C3 Mini Project Templates
-const c3MiniTemplates = {
-    'tft-display': {
-        name: 'TFT Display with Buttons',
-        description: 'ST7735 TFT Display with 3 navigation buttons',
-        code: `#include <Adafruit_GFX.h>
-#include <Adafruit_ST7735.h>
-#include <SPI.h>
-
-// Pin definitions for ESP32-C3 Super Mini
-#define TFT_CS   10  // Chip select
-#define TFT_RST  1   // Reset
-#define TFT_DC   2   // Data/Command
-#define TFT_MOSI 7   // SPI MOSI
-#define TFT_SCK  6   // SPI SCK
-
-#define BTN_UP   3
-#define BTN_OK   4
-#define BTN_DOWN 5
-#define LED_PIN  8
-
-Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_RST);
-
-int menuSelection = 0;
-
-void setup() {
-  Serial.begin(115200);
-  
-  // Initialize buttons
-  pinMode(BTN_UP, INPUT_PULLUP);
-  pinMode(BTN_OK, INPUT_PULLUP);
-  pinMode(BTN_DOWN, INPUT_PULLUP);
-  pinMode(LED_PIN, OUTPUT);
-  
-  // Initialize TFT
-  tft.initR(INITR_BLACKTAB);
-  tft.setRotation(1);
-  tft.fillScreen(ST77XX_BLACK);
-  
-  drawMenu();
-}
-
-void loop() {
-  if (digitalRead(BTN_UP) == LOW) {
-    menuSelection = (menuSelection - 1 + 3) % 3;
-    drawMenu();
-    delay(200);
-  }
-  
-  if (digitalRead(BTN_DOWN) == LOW) {
-    menuSelection = (menuSelection + 1) % 3;
-    drawMenu();
-    delay(200);
-  }
-  
-  if (digitalRead(BTN_OK) == LOW) {
-    handleSelection();
-    delay(200);
-  }
-}
-
-void drawMenu() {
-  tft.fillScreen(ST77XX_BLACK);
-  tft.setTextSize(2);
-  
-  for (int i = 0; i < 3; i++) {
-    if (i == menuSelection) {
-      tft.setTextColor(ST77XX_BLACK, ST77XX_WHITE);
-    } else {
-      tft.setTextColor(ST77XX_WHITE, ST77XX_BLACK);
-    }
-    tft.setCursor(10, 20 + i * 30);
-    tft.print("Option ");
-    tft.print(i + 1);
-  }
-}
-
-void handleSelection() {
-  digitalWrite(LED_PIN, HIGH);
-  tft.fillScreen(ST77XX_BLACK);
-  tft.setTextColor(ST77XX_GREEN);
-  tft.setCursor(20, 40);
-  tft.print("Selected: ");
-  tft.print(menuSelection + 1);
-  delay(1000);
-  digitalWrite(LED_PIN, LOW);
-  drawMenu();
-}
-`
-    },
-    'basic-blink': {
-        name: 'Basic LED Blink',
-        description: 'Simple LED blink example using built-in LED',
-        code: `// ESP32-C3 Super Mini - LED Blink
-const int LED_PIN = 8;  // Built-in LED
-
-void setup() {
-  Serial.begin(115200);
-  pinMode(LED_PIN, OUTPUT);
-  Serial.println("ESP32-C3 Super Mini - LED Blink Started!");
-}
-
-void loop() {
-  digitalWrite(LED_PIN, HIGH);
-  Serial.println("LED ON");
-  delay(1000);
-  
-  digitalWrite(LED_PIN, LOW);
-  Serial.println("LED OFF");
-  delay(1000);
-}
-`
-    },
-    'button-control': {
-        name: 'Button Control',
-        description: 'Control LED with 3 buttons',
-        code: `// ESP32-C3 Super Mini - Button Control
-const int LED_PIN = 8;
-const int BTN_UP = 3;
-const int BTN_OK = 4;
-const int BTN_DOWN = 5;
-
-int brightness = 128;
-
-void setup() {
-  Serial.begin(115200);
-  
-  pinMode(LED_PIN, OUTPUT);
-  pinMode(BTN_UP, INPUT_PULLUP);
-  pinMode(BTN_OK, INPUT_PULLUP);
-  pinMode(BTN_DOWN, INPUT_PULLUP);
-  
-  ledcSetup(0, 5000, 8);
-  ledcAttachPin(LED_PIN, 0);
-  
-  Serial.println("Button Control Started!");
-  Serial.println("UP: Increase brightness");
-  Serial.println("DOWN: Decrease brightness");
-  Serial.println("OK: Toggle ON/OFF");
-}
-
-void loop() {
-  if (digitalRead(BTN_UP) == LOW) {
-    brightness = min(255, brightness + 10);
-    ledcWrite(0, brightness);
-    Serial.println("Brightness: " + String(brightness));
-    delay(100);
-  }
-  
-  if (digitalRead(BTN_DOWN) == LOW) {
-    brightness = max(0, brightness - 10);
-    ledcWrite(0, brightness);
-    Serial.println("Brightness: " + String(brightness));
-    delay(100);
-  }
-  
-  if (digitalRead(BTN_OK) == LOW) {
-    brightness = (brightness > 0) ? 0 : 128;
-    ledcWrite(0, brightness);
-    Serial.println("LED " + String(brightness > 0 ? "ON" : "OFF"));
-    delay(300);
-  }
-}
-`
-    }
-};
-
 let currentBoard = 'esp32-wroom';
 let selectedPin = null;
 let pinConfigurations = {};
-let port = null; // For Web Serial
-let writer = null;
-let reader = null;
 
 // Initialize the application
 function initializeApp() {
@@ -299,6 +129,7 @@ function initializeApp() {
 function createBoardSelector() {
     const selector = document.getElementById('boardSelector');
     if (!selector) {
+        // Create selector if it doesn't exist
         const header = document.querySelector('.header') || document.querySelector('header') || document.body;
         const selectorDiv = document.createElement('div');
         selectorDiv.className = 'board-selector';
@@ -310,15 +141,6 @@ function createBoardSelector() {
                 <option value="esp32-c3">ESP32-C3 (DevKit)</option>
                 <option value="esp32-c3-mini">ESP32-C3 Super Mini</option>
             </select>
-            <div id="templateSelector" style="display:none; margin-top: 10px;">
-                <label for="templateSelect">Project Template:</label>
-                <select id="templateSelect" onchange="loadTemplate(this.value)">
-                    <option value="">-- Select Template --</option>
-                    <option value="tft-display">TFT Display with Buttons</option>
-                    <option value="basic-blink">Basic LED Blink</option>
-                    <option value="button-control">Button Control</option>
-                </select>
-            </div>
         `;
         if (header.tagName === 'HEADER' || header.className.includes('header')) {
             header.appendChild(selectorDiv);
@@ -331,28 +153,10 @@ function createBoardSelector() {
 // Change board and refresh pin diagram
 function changeBoard(boardType) {
     currentBoard = boardType;
-    pinConfigurations = {};
+    pinConfigurations = {}; // Reset configurations when changing boards
     selectedPin = null;
     createPinDiagram();
     document.getElementById('pinConfig').innerHTML = '<p>Select a pin to configure</p>';
-    
-    // Show template selector only for C3 Mini
-    const templateSelector = document.getElementById('templateSelector');
-    if (templateSelector) {
-        templateSelector.style.display = (boardType === 'esp32-c3-mini') ? 'block' : 'none';
-    }
-}
-
-// Load C3 Mini project template
-function loadTemplate(templateKey) {
-    if (!templateKey) return;
-    
-    const template = c3MiniTemplates[templateKey];
-    if (template) {
-        document.getElementById('codeEditor').value = template.code;
-        const output = document.getElementById('output');
-        output.innerHTML = `<span class="success">✅ Loaded template: ${template.name}\n${template.description}</span>`;
-    }
 }
 
 // Create the ESP32 pin diagram
@@ -381,7 +185,9 @@ function createPinDiagram() {
 
 // Select a pin and show its configuration options
 function selectPin(pinNumber) {
+    // Remove previous selection
     document.querySelectorAll('.pin-button').forEach(btn => btn.classList.remove('selected'));
+    // Select current pin
     event.target.closest('.pin-button').classList.add('selected');
     selectedPin = pinNumber;
     showPinConfiguration(pinNumber);
@@ -402,6 +208,7 @@ function showPinConfiguration(pinNumber) {
                     <option value="">Select Mode...</option>
     `;
     
+    // Add appropriate options based on pin capabilities
     pinData.capabilities.forEach(capability => {
         switch(capability) {
             case 'Digital I/O':
@@ -488,6 +295,7 @@ function generateTemplate() {
     let templateCode = `// Auto-generated ${board.name} code template\n`;
     templateCode += `// Board: ${board.name}\n\n`;
     
+    // Add pin definitions
     Object.entries(pinConfigurations).forEach(([pinNumber, config]) => {
         if (config.varName && config.mode) {
             templateCode += `const int ${config.varName} = ${pinNumber}; // ${config.description || config.pin.name}\n`;
@@ -497,6 +305,7 @@ function generateTemplate() {
     templateCode += '\nvoid setup() {\n';
     templateCode += '  Serial.begin(115200);\n\n';
     
+    // Add pin mode configurations
     Object.entries(pinConfigurations).forEach(([pinNumber, config]) => {
         if (config.varName && config.mode) {
             switch(config.mode) {
@@ -534,103 +343,26 @@ function generateTemplate() {
     document.getElementById('codeEditor').value = templateCode;
 }
 
-// Save code to .ino file
-function saveCodeToFile() {
-    const code = document.getElementById('codeEditor').value;
-    const board = boardDefinitions[currentBoard];
-    const filename = `esp32_sketch_${board.name.replace(/\s+/g, '_').toLowerCase()}.ino`;
-    
-    const blob = new Blob([code], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    
-    const output = document.getElementById('output');
-    output.innerHTML = `<span class="success">✅ Saved file: ${filename}</span>`;
-}
-
-// Flash code to ESP32 using Web Serial
-async function flashToESP32() {
-    const output = document.getElementById('output');
-    
-    // Check if Web Serial is supported
-    if (!('serial' in navigator)) {
-        output.innerHTML = `<span class="error">❌ Web Serial API not supported in this browser.\nPlease use Chrome, Edge, or Opera.</span>`;
-        return;
-    }
-    
-    try {
-        // Request port
-        port = await navigator.serial.requestPort();
-        
-        // Open port
-        await port.open({ baudRate: 115200 });
-        
-        output.innerHTML = `<span class="success">✅ Connected to ESP32!\n📡 Serial port opened at 115200 baud\n\n⚠️ Note: This tool opens serial connection for monitoring.\nTo flash firmware, use Arduino IDE or esptool.py\n\nSerial Monitor Active...</span>`;
-        
-        // Set up reader for incoming data
-        const textDecoder = new TextDecoderStream();
-        const readableStreamClosed = port.readable.pipeTo(textDecoder.writable);
-        reader = textDecoder.readable.getReader();
-        
-        // Read serial data
-        readSerialData();
-        
-    } catch (error) {
-        output.innerHTML = `<span class="error">❌ Error connecting to ESP32:\n${error.message}\n\nMake sure:\n1. ESP32 is connected via USB\n2. No other program is using the serial port\n3. You granted permission in the browser</span>`;
-    }
-}
-
-// Read serial data from ESP32
-async function readSerialData() {
-    const output = document.getElementById('output');
-    try {
-        while (true) {
-            const { value, done } = await reader.read();
-            if (done) {
-                reader.releaseLock();
-                break;
-            }
-            if (value) {
-                const currentOutput = output.innerHTML;
-                const successMatch = currentOutput.match(/<span class="success">(.*?)<\/span>/s);
-                if (successMatch) {
-                    output.innerHTML = `<span class="success">${successMatch[1]}\n${value}</span>`;
-                } else {
-                    output.innerHTML += `\n${value}`;
-                }
-                // Auto-scroll to bottom
-                output.scrollTop = output.scrollHeight;
-            }
-        }
-    } catch (error) {
-        console.error('Error reading serial:', error);
-    }
-}
-
 // Clear code editor
 function clearCode() {
     document.getElementById('codeEditor').value = '';
 }
 
-// Validate Arduino code
+// Validate Arduino code (basic syntax checking)
 function validateCode() {
     const code = document.getElementById('codeEditor').value;
     const output = document.getElementById('output');
     let validationResults = [];
     let hasErrors = false;
     
+    // Basic validation checks
     if (!code.trim()) {
         validationResults.push('⚠️ No code to validate');
         output.innerHTML = validationResults.join('\n');
         return;
     }
     
+    // Check for setup() and loop() functions
     if (!code.includes('void setup()')) {
         validationResults.push('❌ ERROR: Missing void setup() function');
         hasErrors = true;
@@ -641,6 +373,7 @@ function validateCode() {
         hasErrors = true;
     }
     
+    // Check for balanced braces
     const openBraces = (code.match(/{/g) || []).length;
     const closeBraces = (code.match(/}/g) || []).length;
     if (openBraces !== closeBraces) {
@@ -648,6 +381,7 @@ function validateCode() {
         hasErrors = true;
     }
     
+    // Check for balanced parentheses
     const openParens = (code.match(/\(/g) || []).length;
     const closeParens = (code.match(/\)/g) || []).length;
     if (openParens !== closeParens) {
@@ -655,10 +389,12 @@ function validateCode() {
         hasErrors = true;
     }
     
+    // Check for Serial.begin() in setup if Serial is used
     if (code.includes('Serial.') && !code.includes('Serial.begin')) {
         validationResults.push('⚠️ WARNING: Using Serial without Serial.begin() in setup()');
     }
     
+    // Check pin configurations against used pins
     const usedPins = [];
     Object.entries(pinConfigurations).forEach(([pinNumber, config]) => {
         if (config.varName && code.includes(config.varName)) {
@@ -666,6 +402,7 @@ function validateCode() {
         }
     });
     
+    // Check for common ESP32 functions
     const esp32Functions = ['digitalWrite', 'digitalRead', 'analogRead', 'analogWrite', 'pinMode'];
     const usedFunctions = esp32Functions.filter(func => code.includes(func));
     
@@ -673,6 +410,7 @@ function validateCode() {
         validationResults.push(`✅ Using ESP32 functions: ${usedFunctions.join(', ')}`);
     }
     
+    // Final result
     if (!hasErrors) {
         validationResults.push('\n🎉 CODE VALIDATION PASSED!');
         validationResults.push('✅ Basic syntax appears correct');
@@ -684,6 +422,7 @@ function validateCode() {
             validationResults.push(...usedPins);
         }
         
+        // Memory usage estimate
         const codeSize = code.length;
         validationResults.push(`\n📊 Estimated code size: ~${codeSize} characters`);
         output.innerHTML = `<span class="success">${validationResults.join('\n')}</span>`;
