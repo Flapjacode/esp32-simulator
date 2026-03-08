@@ -57,7 +57,7 @@ Compact RISC-V based board 22 GPIO pins USB Serial/JTAG built-in Smaller footpri
 🔷 ESP32-C3 Super Mini
 Ultra-compact development board Pre-configured pin labels Perfect for portable projects Built-in LED (GPIO 8) Boot button (GPIO 9)
 
-<br><img width="491" height="550" alt="image" src="https://github.com/user-attachments/assets/2100f568-fa3c-4fe8-9ee8-1ecfa73e0bff"/>
+<br><img width="491" height="550" alt="image" src="https://github.com/Flapjacode/esp32-IDE-simulator/blob/main/images/Overveiw.png"/>
 
 ## Select from multiple functions (GPIO, I2C, SPI, UART, etc.)
 
