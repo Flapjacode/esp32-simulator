@@ -1,135 +1,492 @@
-// ESP32 Board Definitions
+// ════════════════════════════════════════════════════════════════
+//  ESP32 Simulator – script.js
+//  Features: board-grouped dropdown, per-board templates,
+//  board-aware validator, Continue Flash, terminal tab,
+//  serial shortcuts panel, keyboard shortcuts
+// ════════════════════════════════════════════════════════════════
+
+// ─── Board Definitions ───────────────────────────────────────────
 const boardDefinitions = {
     'esp32-wroom': {
         name: 'ESP32 WROOM (DevKit)',
+        arch: 'esp32',
         pins: {
-            0: { name: 'GPIO0', type: 'Boot/Flash', capabilities: ['Digital I/O', 'PWM', 'Boot Pin'] },
-            1: { name: 'GPIO1/TX0', type: 'UART', capabilities: ['UART TX', 'Digital I/O'] },
-            2: { name: 'GPIO2', type: 'Boot/Flash', capabilities: ['Digital I/O', 'PWM', 'Boot Pin', 'LED'] },
-            3: { name: 'GPIO3/RX0', type: 'UART', capabilities: ['UART RX', 'Digital I/O'] },
-            4: { name: 'GPIO4', type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'Touch'] },
-            5: { name: 'GPIO5', type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'SPI CS'] },
-            12: { name: 'GPIO12', type: 'Touch', capabilities: ['Digital I/O', 'PWM', 'Touch', 'ADC2'] },
-            13: { name: 'GPIO13', type: 'Touch', capabilities: ['Digital I/O', 'PWM', 'Touch', 'ADC2'] },
-            14: { name: 'GPIO14', type: 'Touch', capabilities: ['Digital I/O', 'PWM', 'Touch', 'ADC2'] },
-            15: { name: 'GPIO15', type: 'Touch', capabilities: ['Digital I/O', 'PWM', 'Touch', 'ADC2'] },
-            16: { name: 'GPIO16/RX2', type: 'UART', capabilities: ['UART RX', 'Digital I/O', 'PWM'] },
-            17: { name: 'GPIO17/TX2', type: 'UART', capabilities: ['UART TX', 'Digital I/O', 'PWM'] },
-            18: { name: 'GPIO18/SCK', type: 'SPI', capabilities: ['SPI SCK', 'Digital I/O', 'PWM'] },
-            19: { name: 'GPIO19/MISO', type: 'SPI', capabilities: ['SPI MISO', 'Digital I/O', 'PWM'] },
-            21: { name: 'GPIO21/SDA', type: 'I2C', capabilities: ['I2C SDA', 'Digital I/O', 'PWM'] },
-            22: { name: 'GPIO22/SCL', type: 'I2C', capabilities: ['I2C SCL', 'Digital I/O', 'PWM'] },
-            23: { name: 'GPIO23/MOSI', type: 'SPI', capabilities: ['SPI MOSI', 'Digital I/O', 'PWM'] },
-            25: { name: 'GPIO25', type: 'Analog', capabilities: ['Digital I/O', 'PWM', 'DAC1', 'ADC2'] },
-            26: { name: 'GPIO26', type: 'Analog', capabilities: ['Digital I/O', 'PWM', 'DAC2', 'ADC2'] },
-            27: { name: 'GPIO27', type: 'Touch', capabilities: ['Digital I/O', 'PWM', 'Touch', 'ADC2'] },
-            32: { name: 'GPIO32', type: 'Touch', capabilities: ['Digital I/O', 'PWM', 'Touch', 'ADC1'] },
-            33: { name: 'GPIO33', type: 'Touch', capabilities: ['Digital I/O', 'PWM', 'Touch', 'ADC1'] },
-            34: { name: 'GPIO34', type: 'Input Only', capabilities: ['Analog Input', 'ADC1'] },
-            35: { name: 'GPIO35', type: 'Input Only', capabilities: ['Analog Input', 'ADC1'] },
-            36: { name: 'GPIO36/VP', type: 'Input Only', capabilities: ['Analog Input', 'ADC1'] },
-            39: { name: 'GPIO39/VN', type: 'Input Only', capabilities: ['Analog Input', 'ADC1'] }
+            0:  { name: 'GPIO0',       type: 'Boot/Flash',  capabilities: ['Digital I/O', 'PWM', 'Boot Pin'] },
+            1:  { name: 'GPIO1/TX0',   type: 'UART',        capabilities: ['UART TX', 'Digital I/O'] },
+            2:  { name: 'GPIO2',       type: 'Boot/Flash',  capabilities: ['Digital I/O', 'PWM', 'Boot Pin', 'LED'] },
+            3:  { name: 'GPIO3/RX0',   type: 'UART',        capabilities: ['UART RX', 'Digital I/O'] },
+            4:  { name: 'GPIO4',       type: 'Digital',     capabilities: ['Digital I/O', 'PWM', 'Touch'] },
+            5:  { name: 'GPIO5',       type: 'Digital',     capabilities: ['Digital I/O', 'PWM', 'SPI CS'] },
+            12: { name: 'GPIO12',      type: 'Touch',       capabilities: ['Digital I/O', 'PWM', 'Touch', 'ADC2'] },
+            13: { name: 'GPIO13',      type: 'Touch',       capabilities: ['Digital I/O', 'PWM', 'Touch', 'ADC2'] },
+            14: { name: 'GPIO14',      type: 'Touch',       capabilities: ['Digital I/O', 'PWM', 'Touch', 'ADC2'] },
+            15: { name: 'GPIO15',      type: 'Touch',       capabilities: ['Digital I/O', 'PWM', 'Touch', 'ADC2'] },
+            16: { name: 'GPIO16/RX2',  type: 'UART',        capabilities: ['UART RX', 'Digital I/O', 'PWM'] },
+            17: { name: 'GPIO17/TX2',  type: 'UART',        capabilities: ['UART TX', 'Digital I/O', 'PWM'] },
+            18: { name: 'GPIO18/SCK',  type: 'SPI',         capabilities: ['SPI SCK', 'Digital I/O', 'PWM'] },
+            19: { name: 'GPIO19/MISO', type: 'SPI',         capabilities: ['SPI MISO', 'Digital I/O', 'PWM'] },
+            21: { name: 'GPIO21/SDA',  type: 'I2C',         capabilities: ['I2C SDA', 'Digital I/O', 'PWM'] },
+            22: { name: 'GPIO22/SCL',  type: 'I2C',         capabilities: ['I2C SCL', 'Digital I/O', 'PWM'] },
+            23: { name: 'GPIO23/MOSI', type: 'SPI',         capabilities: ['SPI MOSI', 'Digital I/O', 'PWM'] },
+            25: { name: 'GPIO25',      type: 'Analog',      capabilities: ['Digital I/O', 'PWM', 'DAC1', 'ADC2'] },
+            26: { name: 'GPIO26',      type: 'Analog',      capabilities: ['Digital I/O', 'PWM', 'DAC2', 'ADC2'] },
+            27: { name: 'GPIO27',      type: 'Touch',       capabilities: ['Digital I/O', 'PWM', 'Touch', 'ADC2'] },
+            32: { name: 'GPIO32',      type: 'Touch',       capabilities: ['Digital I/O', 'PWM', 'Touch', 'ADC1'] },
+            33: { name: 'GPIO33',      type: 'Touch',       capabilities: ['Digital I/O', 'PWM', 'Touch', 'ADC1'] },
+            34: { name: 'GPIO34',      type: 'Input Only',  capabilities: ['Analog Input', 'ADC1'] },
+            35: { name: 'GPIO35',      type: 'Input Only',  capabilities: ['Analog Input', 'ADC1'] },
+            36: { name: 'GPIO36/VP',   type: 'Input Only',  capabilities: ['Analog Input', 'ADC1'] },
+            39: { name: 'GPIO39/VN',   type: 'Input Only',  capabilities: ['Analog Input', 'ADC1'] }
         }
     },
-    
+
     'esp32-s3': {
         name: 'ESP32-S3',
+        arch: 'esp32s3',
         pins: {
-            0: { name: 'GPIO0', type: 'Boot', capabilities: ['Digital I/O', 'PWM', 'Boot Pin'] },
-            1: { name: 'GPIO1', type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC1'] },
-            2: { name: 'GPIO2', type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC1'] },
-            3: { name: 'GPIO3', type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC1'] },
-            4: { name: 'GPIO4', type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC1'] },
-            5: { name: 'GPIO5', type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC1'] },
-            6: { name: 'GPIO6', type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC1'] },
-            7: { name: 'GPIO7', type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC1'] },
-            8: { name: 'GPIO8', type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC1'] },
-            9: { name: 'GPIO9', type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC1'] },
-            10: { name: 'GPIO10', type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC1'] },
-            11: { name: 'GPIO11', type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC2'] },
-            12: { name: 'GPIO12', type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC2'] },
-            13: { name: 'GPIO13', type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC2'] },
-            14: { name: 'GPIO14', type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC2'] },
-            15: { name: 'GPIO15', type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC2'] },
-            16: { name: 'GPIO16', type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC2'] },
-            17: { name: 'GPIO17', type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC2'] },
-            18: { name: 'GPIO18', type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC2'] },
-            19: { name: 'GPIO19', type: 'USB', capabilities: ['Digital I/O', 'PWM', 'USB D-'] },
-            20: { name: 'GPIO20', type: 'USB', capabilities: ['Digital I/O', 'PWM', 'USB D+'] },
-            21: { name: 'GPIO21', type: 'Digital', capabilities: ['Digital I/O', 'PWM'] },
-            35: { name: 'GPIO35/SPI MISO', type: 'SPI', capabilities: ['Digital I/O', 'PWM', 'SPI MISO'] },
-            36: { name: 'GPIO36/SPI SCK', type: 'SPI', capabilities: ['Digital I/O', 'PWM', 'SPI SCK'] },
-            37: { name: 'GPIO37/SPI MOSI', type: 'SPI', capabilities: ['Digital I/O', 'PWM', 'SPI MOSI'] },
-            38: { name: 'GPIO38/SPI CS', type: 'SPI', capabilities: ['Digital I/O', 'PWM', 'SPI CS'] },
-            39: { name: 'GPIO39', type: 'Digital', capabilities: ['Digital I/O', 'PWM'] },
-            40: { name: 'GPIO40', type: 'Digital', capabilities: ['Digital I/O', 'PWM'] },
-            41: { name: 'GPIO41', type: 'Digital', capabilities: ['Digital I/O', 'PWM'] },
-            42: { name: 'GPIO42', type: 'Digital', capabilities: ['Digital I/O', 'PWM'] },
-            43: { name: 'GPIO43/TX0', type: 'UART', capabilities: ['Digital I/O', 'UART TX'] },
-            44: { name: 'GPIO44/RX0', type: 'UART', capabilities: ['Digital I/O', 'UART RX'] },
-            45: { name: 'GPIO45', type: 'Digital', capabilities: ['Digital I/O', 'PWM'] },
-            46: { name: 'GPIO46', type: 'Digital', capabilities: ['Digital I/O', 'PWM'] },
-            47: { name: 'GPIO47', type: 'Digital', capabilities: ['Digital I/O', 'PWM'] },
-            48: { name: 'GPIO48/RGB LED', type: 'LED', capabilities: ['Digital I/O', 'PWM', 'RGB LED'] }
+            0:  { name: 'GPIO0',           type: 'Boot',    capabilities: ['Digital I/O', 'PWM', 'Boot Pin'] },
+            1:  { name: 'GPIO1',           type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC1'] },
+            2:  { name: 'GPIO2',           type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC1'] },
+            3:  { name: 'GPIO3',           type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC1'] },
+            4:  { name: 'GPIO4',           type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC1'] },
+            5:  { name: 'GPIO5',           type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC1'] },
+            6:  { name: 'GPIO6',           type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC1'] },
+            7:  { name: 'GPIO7',           type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC1'] },
+            8:  { name: 'GPIO8',           type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC1'] },
+            9:  { name: 'GPIO9',           type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC1'] },
+            10: { name: 'GPIO10',          type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC1'] },
+            11: { name: 'GPIO11',          type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC2'] },
+            12: { name: 'GPIO12',          type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC2'] },
+            13: { name: 'GPIO13',          type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC2'] },
+            14: { name: 'GPIO14',          type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC2'] },
+            15: { name: 'GPIO15',          type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC2'] },
+            16: { name: 'GPIO16',          type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC2'] },
+            17: { name: 'GPIO17',          type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC2'] },
+            18: { name: 'GPIO18',          type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC2'] },
+            19: { name: 'GPIO19',          type: 'USB',     capabilities: ['Digital I/O', 'PWM', 'USB D-'] },
+            20: { name: 'GPIO20',          type: 'USB',     capabilities: ['Digital I/O', 'PWM', 'USB D+'] },
+            21: { name: 'GPIO21',          type: 'Digital', capabilities: ['Digital I/O', 'PWM'] },
+            35: { name: 'GPIO35/SPI MISO', type: 'SPI',     capabilities: ['Digital I/O', 'PWM', 'SPI MISO'] },
+            36: { name: 'GPIO36/SPI SCK',  type: 'SPI',     capabilities: ['Digital I/O', 'PWM', 'SPI SCK'] },
+            37: { name: 'GPIO37/SPI MOSI', type: 'SPI',     capabilities: ['Digital I/O', 'PWM', 'SPI MOSI'] },
+            38: { name: 'GPIO38/SPI CS',   type: 'SPI',     capabilities: ['Digital I/O', 'PWM', 'SPI CS'] },
+            39: { name: 'GPIO39',          type: 'Digital', capabilities: ['Digital I/O', 'PWM'] },
+            40: { name: 'GPIO40',          type: 'Digital', capabilities: ['Digital I/O', 'PWM'] },
+            41: { name: 'GPIO41',          type: 'Digital', capabilities: ['Digital I/O', 'PWM'] },
+            42: { name: 'GPIO42',          type: 'Digital', capabilities: ['Digital I/O', 'PWM'] },
+            43: { name: 'GPIO43/TX0',      type: 'UART',    capabilities: ['Digital I/O', 'UART TX'] },
+            44: { name: 'GPIO44/RX0',      type: 'UART',    capabilities: ['Digital I/O', 'UART RX'] },
+            45: { name: 'GPIO45',          type: 'Digital', capabilities: ['Digital I/O', 'PWM'] },
+            46: { name: 'GPIO46',          type: 'Digital', capabilities: ['Digital I/O', 'PWM'] },
+            47: { name: 'GPIO47',          type: 'Digital', capabilities: ['Digital I/O', 'PWM'] },
+            48: { name: 'GPIO48/RGB LED',  type: 'LED',     capabilities: ['Digital I/O', 'PWM', 'RGB LED'] }
         }
     },
-    
+
     'esp32-c3': {
         name: 'ESP32-C3 (DevKit)',
+        arch: 'esp32c3',
         pins: {
-            0: { name: 'GPIO0', type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC1'] },
-            1: { name: 'GPIO1', type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC1'] },
-            2: { name: 'GPIO2', type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC1'] },
-            3: { name: 'GPIO3', type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC1'] },
-            4: { name: 'GPIO4', type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC1'] },
-            5: { name: 'GPIO5', type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC2'] },
-            6: { name: 'GPIO6/SPI SCK', type: 'SPI', capabilities: ['Digital I/O', 'PWM', 'SPI SCK'] },
-            7: { name: 'GPIO7/SPI MOSI', type: 'SPI', capabilities: ['Digital I/O', 'PWM', 'SPI MOSI'] },
-            8: { name: 'GPIO8', type: 'Digital', capabilities: ['Digital I/O', 'PWM'] },
-            9: { name: 'GPIO9/Boot', type: 'Boot', capabilities: ['Digital I/O', 'PWM', 'Boot Pin'] },
-            10: { name: 'GPIO10', type: 'Digital', capabilities: ['Digital I/O', 'PWM'] },
-            18: { name: 'GPIO18/USB D-', type: 'USB', capabilities: ['Digital I/O', 'USB D-'] },
-            19: { name: 'GPIO19/USB D+', type: 'USB', capabilities: ['Digital I/O', 'USB D+'] },
-            20: { name: 'GPIO20/RX', type: 'UART', capabilities: ['Digital I/O', 'UART RX'] },
-            21: { name: 'GPIO21/TX', type: 'UART', capabilities: ['Digital I/O', 'UART TX'] }
+            0:  { name: 'GPIO0',         type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC1'] },
+            1:  { name: 'GPIO1',         type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC1'] },
+            2:  { name: 'GPIO2',         type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC1'] },
+            3:  { name: 'GPIO3',         type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC1'] },
+            4:  { name: 'GPIO4',         type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC1'] },
+            5:  { name: 'GPIO5',         type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC2'] },
+            6:  { name: 'GPIO6/SPI SCK', type: 'SPI',     capabilities: ['Digital I/O', 'PWM', 'SPI SCK'] },
+            7:  { name: 'GPIO7/SPI MOSI',type: 'SPI',     capabilities: ['Digital I/O', 'PWM', 'SPI MOSI'] },
+            8:  { name: 'GPIO8',         type: 'Digital', capabilities: ['Digital I/O', 'PWM'] },
+            9:  { name: 'GPIO9/Boot',    type: 'Boot',    capabilities: ['Digital I/O', 'PWM', 'Boot Pin'] },
+            10: { name: 'GPIO10',        type: 'Digital', capabilities: ['Digital I/O', 'PWM'] },
+            18: { name: 'GPIO18/USB D-', type: 'USB',     capabilities: ['Digital I/O', 'USB D-'] },
+            19: { name: 'GPIO19/USB D+', type: 'USB',     capabilities: ['Digital I/O', 'USB D+'] },
+            20: { name: 'GPIO20/RX',     type: 'UART',    capabilities: ['Digital I/O', 'UART RX'] },
+            21: { name: 'GPIO21/TX',     type: 'UART',    capabilities: ['Digital I/O', 'UART TX'] }
         }
     },
-    
+
     'esp32-c3-mini': {
         name: 'ESP32-C3 Super Mini',
+        arch: 'esp32c3',
         pins: {
-            0: { name: 'GPIO0', type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC1'] },
-            1: { name: 'GPIO1/TFT RST', type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC1'] },
-            2: { name: 'GPIO2/TFT DC', type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC1'] },
-            3: { name: 'GPIO3/BTN UP', type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC1'] },
-            4: { name: 'GPIO4/BTN OK', type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC1'] },
-            5: { name: 'GPIO5/BTN DOWN', type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC2'] },
-            6: { name: 'GPIO6/SPI SCK', type: 'SPI', capabilities: ['Digital I/O', 'PWM', 'SPI SCK'] },
-            7: { name: 'GPIO7/SPI MOSI', type: 'SPI', capabilities: ['Digital I/O', 'PWM', 'SPI MOSI'] },
-            8: { name: 'GPIO8/LED', type: 'LED', capabilities: ['Digital I/O', 'PWM', 'Built-in LED'] },
-            9: { name: 'GPIO9/Boot', type: 'Boot', capabilities: ['Digital I/O', 'PWM', 'Boot Button'] },
-            10: { name: 'GPIO10/TFT CS', type: 'SPI', capabilities: ['Digital I/O', 'PWM', 'SPI CS'] },
-            20: { name: 'GPIO20', type: 'Digital', capabilities: ['Digital I/O', 'PWM'] },
-            21: { name: 'GPIO21', type: 'Digital', capabilities: ['Digital I/O', 'PWM'] }
+            0:  { name: 'GPIO0',           type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC1'] },
+            1:  { name: 'GPIO1/TFT RST',   type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC1'] },
+            2:  { name: 'GPIO2/TFT DC',    type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC1'] },
+            3:  { name: 'GPIO3/BTN UP',    type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC1'] },
+            4:  { name: 'GPIO4/BTN OK',    type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC1'] },
+            5:  { name: 'GPIO5/BTN DOWN',  type: 'Digital', capabilities: ['Digital I/O', 'PWM', 'ADC2'] },
+            6:  { name: 'GPIO6/SPI SCK',   type: 'SPI',     capabilities: ['Digital I/O', 'PWM', 'SPI SCK'] },
+            7:  { name: 'GPIO7/SPI MOSI',  type: 'SPI',     capabilities: ['Digital I/O', 'PWM', 'SPI MOSI'] },
+            8:  { name: 'GPIO8/LED',       type: 'LED',     capabilities: ['Digital I/O', 'PWM', 'Built-in LED'] },
+            9:  { name: 'GPIO9/Boot',      type: 'Boot',    capabilities: ['Digital I/O', 'PWM', 'Boot Button'] },
+            10: { name: 'GPIO10/TFT CS',   type: 'SPI',     capabilities: ['Digital I/O', 'PWM', 'SPI CS'] },
+            20: { name: 'GPIO20',          type: 'Digital', capabilities: ['Digital I/O', 'PWM'] },
+            21: { name: 'GPIO21',          type: 'Digital', capabilities: ['Digital I/O', 'PWM'] }
         }
     }
 };
 
-// C3 Mini Project Templates
-const c3MiniTemplates = {
-    'tft-display': {
-        name: 'TFT Display with Buttons',
-        description: 'ST7735 TFT Display with 3 navigation buttons',
-        code: `#include <Adafruit_GFX.h>
+// ─── Board-specific validation rules ─────────────────────────────
+const boardValidationRules = {
+    'esp32-wroom': {
+        inputOnlyPins: [34, 35, 36, 39],
+        noAnalogWrite: true,
+        dacPins: [25, 26],
+        pwmApi: 'ledcSetup / ledcAttachPin / ledcWrite',
+        notes: [
+            '⚠️ GPIO34, 35, 36, 39 are INPUT ONLY — do not use as OUTPUT.',
+            '⚠️ GPIO6–11 are connected to flash memory — do not use.',
+            '⚠️ GPIO0, 2 are boot strapping pins — use with caution.',
+            '⚠️ analogWrite() is NOT available. Use ledcWrite() for PWM.'
+        ]
+    },
+    'esp32-s3': {
+        inputOnlyPins: [],
+        noAnalogWrite: true,
+        pwmApi: 'ledcSetup / ledcAttachPin / ledcWrite',
+        usbPins: [19, 20],
+        rgbLedPin: 48,
+        notes: [
+            '⚠️ GPIO19, 20 are USB D- / D+ — do not repurpose if using USB.',
+            '⚠️ GPIO48 is the onboard RGB LED (NeoPixel-compatible).',
+            '⚠️ analogWrite() is NOT available. Use ledcWrite() for PWM.',
+            '⚠️ GPIO26–32 are connected to flash/PSRAM — do not use.'
+        ]
+    },
+    'esp32-c3': {
+        inputOnlyPins: [],
+        noAnalogWrite: true,
+        pwmApi: 'ledcSetup / ledcAttachPin / ledcWrite',
+        usbPins: [18, 19],
+        bootPin: 9,
+        notes: [
+            '⚠️ GPIO18, 19 are USB D- / D+ — do not repurpose if using USB.',
+            '⚠️ GPIO9 is the boot button — use with caution.',
+            '⚠️ analogWrite() is NOT available. Use ledcWrite() for PWM.',
+            '⚠️ RISC-V architecture — some ESP32 libraries may not be compatible.'
+        ]
+    },
+    'esp32-c3-mini': {
+        inputOnlyPins: [],
+        noAnalogWrite: true,
+        pwmApi: 'ledcSetup / ledcAttachPin / ledcWrite',
+        usbPins: [],
+        bootPin: 9,
+        ledPin: 8,
+        notes: [
+            '⚠️ GPIO9 is the boot button — use with caution.',
+            '⚠️ GPIO8 is the built-in LED.',
+            '⚠️ analogWrite() is NOT available. Use ledcWrite() for PWM.',
+            '⚠️ RISC-V architecture — some ESP32 libraries may not be compatible.'
+        ]
+    }
+};
+
+// ─── Project Templates (per board) ───────────────────────────────
+const projectTemplates = {
+    'esp32-wroom': {
+        'blink': {
+            name: 'Basic LED Blink',
+            description: 'Blink the onboard LED on GPIO2',
+            code: `// ESP32 WROOM – Basic LED Blink
+const int LED_PIN = 2;  // Onboard LED
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(LED_PIN, OUTPUT);
+  Serial.println("ESP32 WROOM – Blink Started!");
+}
+
+void loop() {
+  digitalWrite(LED_PIN, HIGH);
+  Serial.println("LED ON");
+  delay(1000);
+
+  digitalWrite(LED_PIN, LOW);
+  Serial.println("LED OFF");
+  delay(1000);
+}
+`
+        },
+        'wifi-scan': {
+            name: 'WiFi Scanner',
+            description: 'Scan and list available WiFi networks',
+            code: `// ESP32 WROOM – WiFi Scanner
+#include <WiFi.h>
+
+void setup() {
+  Serial.begin(115200);
+  WiFi.mode(WIFI_STA);
+  WiFi.disconnect();
+  delay(100);
+  Serial.println("WiFi Scanner Ready");
+}
+
+void loop() {
+  Serial.println("Scanning...");
+  int n = WiFi.scanNetworks();
+
+  if (n == 0) {
+    Serial.println("No networks found.");
+  } else {
+    Serial.print(n);
+    Serial.println(" networks found:");
+    for (int i = 0; i < n; ++i) {
+      Serial.print(i + 1);
+      Serial.print(": ");
+      Serial.print(WiFi.SSID(i));
+      Serial.print(" (");
+      Serial.print(WiFi.RSSI(i));
+      Serial.println(" dBm)");
+      delay(10);
+    }
+  }
+  Serial.println();
+  delay(5000);
+}
+`
+        },
+        'analog-read': {
+            name: 'Analog Read (ADC)',
+            description: 'Read analog value from GPIO34 (input-only ADC)',
+            code: `// ESP32 WROOM – Analog Read
+const int ANALOG_PIN = 34;  // Input-only ADC pin
+
+void setup() {
+  Serial.begin(115200);
+  analogReadResolution(12); // 12-bit: 0–4095
+  Serial.println("Analog Read Started");
+}
+
+void loop() {
+  int raw = analogRead(ANALOG_PIN);
+  float voltage = raw * (3.3f / 4095.0f);
+  Serial.print("Raw: ");
+  Serial.print(raw);
+  Serial.print("  Voltage: ");
+  Serial.print(voltage, 2);
+  Serial.println(" V");
+  delay(500);
+}
+`
+        },
+        'pwm-led': {
+            name: 'PWM Fade LED',
+            description: 'Fade an LED using LEDC PWM on GPIO5',
+            code: `// ESP32 WROOM – PWM LED Fade
+const int LED_PIN  = 5;
+const int PWM_CH   = 0;
+const int PWM_FREQ = 5000;
+const int PWM_RES  = 8; // 8-bit: 0–255
+
+void setup() {
+  Serial.begin(115200);
+  ledcSetup(PWM_CH, PWM_FREQ, PWM_RES);
+  ledcAttachPin(LED_PIN, PWM_CH);
+  Serial.println("PWM Fade Started");
+}
+
+void loop() {
+  for (int duty = 0; duty <= 255; duty += 5) {
+    ledcWrite(PWM_CH, duty);
+    delay(20);
+  }
+  for (int duty = 255; duty >= 0; duty -= 5) {
+    ledcWrite(PWM_CH, duty);
+    delay(20);
+  }
+}
+`
+        }
+    },
+
+    'esp32-s3': {
+        'blink': {
+            name: 'Basic LED Blink',
+            description: 'Blink using GPIO2 (or adjust to your board LED)',
+            code: `// ESP32-S3 – Basic LED Blink
+const int LED_PIN = 2;
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(LED_PIN, OUTPUT);
+  Serial.println("ESP32-S3 Blink Started!");
+}
+
+void loop() {
+  digitalWrite(LED_PIN, HIGH);
+  Serial.println("LED ON");
+  delay(1000);
+  digitalWrite(LED_PIN, LOW);
+  Serial.println("LED OFF");
+  delay(1000);
+}
+`
+        },
+        'rgb-led': {
+            name: 'RGB NeoPixel (GPIO48)',
+            description: 'Control the onboard RGB LED on GPIO48',
+            code: `// ESP32-S3 – Onboard RGB NeoPixel (GPIO48)
+#include <Adafruit_NeoPixel.h>
+
+#define RGB_PIN   48
+#define NUM_LEDS  1
+
+Adafruit_NeoPixel strip(NUM_LEDS, RGB_PIN, NEO_GRB + NEO_KHZ800);
+
+void setup() {
+  Serial.begin(115200);
+  strip.begin();
+  strip.setBrightness(50);
+  strip.show();
+  Serial.println("RGB LED Ready");
+}
+
+void loop() {
+  colorCycle(1000);
+}
+
+void colorCycle(int wait) {
+  strip.setPixelColor(0, strip.Color(255, 0, 0)); strip.show(); delay(wait);
+  strip.setPixelColor(0, strip.Color(0, 255, 0)); strip.show(); delay(wait);
+  strip.setPixelColor(0, strip.Color(0, 0, 255)); strip.show(); delay(wait);
+  strip.setPixelColor(0, strip.Color(255, 255, 0)); strip.show(); delay(wait);
+  strip.setPixelColor(0, 0); strip.show(); delay(wait);
+}
+`
+        },
+        'usb-serial': {
+            name: 'USB Serial Echo',
+            description: 'Echo serial input back via USB CDC',
+            code: `// ESP32-S3 – USB Serial Echo (USB CDC)
+// Ensure "USB CDC On Boot: Enabled" in Arduino board settings
+
+void setup() {
+  Serial.begin(115200);   // USB CDC serial
+  Serial.setTimeout(100);
+  Serial.println("ESP32-S3 USB Serial Echo Ready");
+  Serial.println("Type something and press Enter...");
+}
+
+void loop() {
+  if (Serial.available()) {
+    String input = Serial.readStringUntil('\\n');
+    input.trim();
+    Serial.print("Echo > ");
+    Serial.println(input);
+  }
+}
+`
+        },
+        'pwm-led': {
+            name: 'PWM Fade LED',
+            description: 'Fade an LED using LEDC on GPIO5',
+            code: `// ESP32-S3 – PWM LED Fade
+const int LED_PIN  = 5;
+const int PWM_CH   = 0;
+const int PWM_FREQ = 5000;
+const int PWM_RES  = 8;
+
+void setup() {
+  Serial.begin(115200);
+  ledcSetup(PWM_CH, PWM_FREQ, PWM_RES);
+  ledcAttachPin(LED_PIN, PWM_CH);
+  Serial.println("S3 PWM Fade Started");
+}
+
+void loop() {
+  for (int d = 0; d <= 255; d += 5) { ledcWrite(PWM_CH, d); delay(15); }
+  for (int d = 255; d >= 0; d -= 5) { ledcWrite(PWM_CH, d); delay(15); }
+}
+`
+        }
+    },
+
+    'esp32-c3': {
+        'blink': {
+            name: 'Basic LED Blink',
+            description: 'Blink using GPIO8 (onboard LED on most C3 devkits)',
+            code: `// ESP32-C3 – Basic LED Blink
+const int LED_PIN = 8;
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(LED_PIN, OUTPUT);
+  Serial.println("ESP32-C3 Blink Started!");
+}
+
+void loop() {
+  digitalWrite(LED_PIN, HIGH);
+  Serial.println("LED ON");
+  delay(1000);
+  digitalWrite(LED_PIN, LOW);
+  Serial.println("LED OFF");
+  delay(1000);
+}
+`
+        },
+        'button-read': {
+            name: 'Button Read',
+            description: 'Read GPIO9 boot button and print state',
+            code: `// ESP32-C3 – Boot Button Read
+const int BTN_PIN = 9;   // Boot/BOOT button
+const int LED_PIN = 8;
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(BTN_PIN, INPUT_PULLUP);
+  pinMode(LED_PIN, OUTPUT);
+  Serial.println("Button Test Ready – press the BOOT button");
+}
+
+void loop() {
+  bool pressed = (digitalRead(BTN_PIN) == LOW);
+  digitalWrite(LED_PIN, pressed ? HIGH : LOW);
+  if (pressed) {
+    Serial.println("Button PRESSED");
+    delay(200);
+  }
+}
+`
+        },
+        'pwm-led': {
+            name: 'PWM Fade LED',
+            description: 'Fade LED on GPIO8 using LEDC (C3 RISC-V)',
+            code: `// ESP32-C3 – PWM LED Fade (RISC-V)
+const int LED_PIN  = 8;
+const int PWM_CH   = 0;
+const int PWM_FREQ = 5000;
+const int PWM_RES  = 8;
+
+void setup() {
+  Serial.begin(115200);
+  ledcSetup(PWM_CH, PWM_FREQ, PWM_RES);
+  ledcAttachPin(LED_PIN, PWM_CH);
+  Serial.println("C3 PWM Fade Started");
+}
+
+void loop() {
+  for (int d = 0; d <= 255; d += 5) { ledcWrite(PWM_CH, d); delay(15); }
+  for (int d = 255; d >= 0; d -= 5) { ledcWrite(PWM_CH, d); delay(15); }
+}
+`
+        }
+    },
+
+    'esp32-c3-mini': {
+        'tft-display': {
+            name: 'TFT Display + Buttons',
+            description: 'ST7735 TFT Display with 3 navigation buttons',
+            code: `// ESP32-C3 Super Mini – TFT + Buttons
+#include <Adafruit_GFX.h>
 #include <Adafruit_ST7735.h>
 #include <SPI.h>
 
-// Pin definitions for ESP32-C3 Super Mini
-#define TFT_CS   10  // Chip select
-#define TFT_RST  1   // Reset
-#define TFT_DC   2   // Data/Command
-#define TFT_MOSI 7   // SPI MOSI
-#define TFT_SCK  6   // SPI SCK
+#define TFT_CS   10
+#define TFT_RST  1
+#define TFT_DC   2
+#define TFT_MOSI 7
+#define TFT_SCK  6
 
 #define BTN_UP   3
 #define BTN_OK   4
@@ -137,58 +494,34 @@ const c3MiniTemplates = {
 #define LED_PIN  8
 
 Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_RST);
-
 int menuSelection = 0;
 
 void setup() {
   Serial.begin(115200);
-  
-  // Initialize buttons
   pinMode(BTN_UP, INPUT_PULLUP);
   pinMode(BTN_OK, INPUT_PULLUP);
   pinMode(BTN_DOWN, INPUT_PULLUP);
   pinMode(LED_PIN, OUTPUT);
-  
-  // Initialize TFT
   tft.initR(INITR_BLACKTAB);
   tft.setRotation(1);
   tft.fillScreen(ST77XX_BLACK);
-  
   drawMenu();
 }
 
 void loop() {
-  if (digitalRead(BTN_UP) == LOW) {
-    menuSelection = (menuSelection - 1 + 3) % 3;
-    drawMenu();
-    delay(200);
-  }
-  
-  if (digitalRead(BTN_DOWN) == LOW) {
-    menuSelection = (menuSelection + 1) % 3;
-    drawMenu();
-    delay(200);
-  }
-  
-  if (digitalRead(BTN_OK) == LOW) {
-    handleSelection();
-    delay(200);
-  }
+  if (digitalRead(BTN_UP) == LOW)   { menuSelection = (menuSelection - 1 + 3) % 3; drawMenu(); delay(200); }
+  if (digitalRead(BTN_DOWN) == LOW) { menuSelection = (menuSelection + 1) % 3;     drawMenu(); delay(200); }
+  if (digitalRead(BTN_OK) == LOW)   { handleSelection(); delay(200); }
 }
 
 void drawMenu() {
   tft.fillScreen(ST77XX_BLACK);
   tft.setTextSize(2);
-  
   for (int i = 0; i < 3; i++) {
-    if (i == menuSelection) {
-      tft.setTextColor(ST77XX_BLACK, ST77XX_WHITE);
-    } else {
-      tft.setTextColor(ST77XX_WHITE, ST77XX_BLACK);
-    }
+    tft.setTextColor(i == menuSelection ? ST77XX_BLACK : ST77XX_WHITE,
+                     i == menuSelection ? ST77XX_WHITE : ST77XX_BLACK);
     tft.setCursor(10, 20 + i * 30);
-    tft.print("Option ");
-    tft.print(i + 1);
+    tft.print("Option "); tft.print(i + 1);
   }
 }
 
@@ -197,180 +530,158 @@ void handleSelection() {
   tft.fillScreen(ST77XX_BLACK);
   tft.setTextColor(ST77XX_GREEN);
   tft.setCursor(20, 40);
-  tft.print("Selected: ");
-  tft.print(menuSelection + 1);
+  tft.print("Selected: "); tft.print(menuSelection + 1);
   delay(1000);
   digitalWrite(LED_PIN, LOW);
   drawMenu();
 }
 `
-    },
-    'basic-blink': {
-        name: 'Basic LED Blink',
-        description: 'Simple LED blink example using built-in LED',
-        code: `// ESP32-C3 Super Mini - LED Blink
-const int LED_PIN = 8;  // Built-in LED
+        },
+        'basic-blink': {
+            name: 'Basic LED Blink',
+            description: 'Blink built-in LED on GPIO8',
+            code: `// ESP32-C3 Super Mini – LED Blink
+const int LED_PIN = 8;
 
 void setup() {
   Serial.begin(115200);
   pinMode(LED_PIN, OUTPUT);
-  Serial.println("ESP32-C3 Super Mini - LED Blink Started!");
+  Serial.println("ESP32-C3 Super Mini – Blink Started!");
 }
 
 void loop() {
-  digitalWrite(LED_PIN, HIGH);
-  Serial.println("LED ON");
-  delay(1000);
-  
-  digitalWrite(LED_PIN, LOW);
-  Serial.println("LED OFF");
-  delay(1000);
+  digitalWrite(LED_PIN, HIGH); Serial.println("LED ON");  delay(1000);
+  digitalWrite(LED_PIN, LOW);  Serial.println("LED OFF"); delay(1000);
 }
 `
-    },
-    'button-control': {
-        name: 'Button Control',
-        description: 'Control LED with 3 buttons',
-        code: `// ESP32-C3 Super Mini - Button Control
-const int LED_PIN = 8;
-const int BTN_UP = 3;
-const int BTN_OK = 4;
+        },
+        'button-control': {
+            name: 'Button Control',
+            description: 'Control LED brightness with 3 buttons',
+            code: `// ESP32-C3 Super Mini – Button Control
+const int LED_PIN  = 8;
+const int BTN_UP   = 3;
+const int BTN_OK   = 4;
 const int BTN_DOWN = 5;
-
 int brightness = 128;
+bool ledOn = true;
 
 void setup() {
   Serial.begin(115200);
-  
   pinMode(LED_PIN, OUTPUT);
-  pinMode(BTN_UP, INPUT_PULLUP);
-  pinMode(BTN_OK, INPUT_PULLUP);
+  pinMode(BTN_UP,   INPUT_PULLUP);
+  pinMode(BTN_OK,   INPUT_PULLUP);
   pinMode(BTN_DOWN, INPUT_PULLUP);
-  
   ledcSetup(0, 5000, 8);
   ledcAttachPin(LED_PIN, 0);
-  
-  Serial.println("Button Control Started!");
-  Serial.println("UP: Increase brightness");
-  Serial.println("DOWN: Decrease brightness");
-  Serial.println("OK: Toggle ON/OFF");
+  Serial.println("Button Control Ready");
 }
 
 void loop() {
-  if (digitalRead(BTN_UP) == LOW) {
-    brightness = min(255, brightness + 10);
-    ledcWrite(0, brightness);
-    Serial.println("Brightness: " + String(brightness));
-    delay(100);
-  }
-  
-  if (digitalRead(BTN_DOWN) == LOW) {
-    brightness = max(0, brightness - 10);
-    ledcWrite(0, brightness);
-    Serial.println("Brightness: " + String(brightness));
-    delay(100);
-  }
-  
-  if (digitalRead(BTN_OK) == LOW) {
-    brightness = (brightness > 0) ? 0 : 128;
-    ledcWrite(0, brightness);
-    Serial.println("LED " + String(brightness > 0 ? "ON" : "OFF"));
-    delay(300);
-  }
+  if (digitalRead(BTN_UP) == LOW)   { brightness = min(255, brightness + 10); ledcWrite(0, brightness); Serial.print("Brightness: "); Serial.println(brightness); delay(100); }
+  if (digitalRead(BTN_DOWN) == LOW) { brightness = max(0, brightness - 10);   ledcWrite(0, brightness); Serial.print("Brightness: "); Serial.println(brightness); delay(100); }
+  if (digitalRead(BTN_OK) == LOW)   { brightness = (brightness > 0) ? 0 : 128; ledcWrite(0, brightness); Serial.println(brightness > 0 ? "LED ON" : "LED OFF"); delay(300); }
 }
 `
+        }
     }
 };
 
+// ─── State ───────────────────────────────────────────────────────
 let currentBoard = 'esp32-wroom';
 let selectedPin = null;
 let pinConfigurations = {};
-let port = null; // For Web Serial
+let port = null;
 let writer = null;
 let reader = null;
+let isConnected = false;
+let activeTab = 'output';
+let terminalHistory = [];
+let historyIndex = -1;
 
-// Initialize the application
+// ─── Init ─────────────────────────────────────────────────────────
 function initializeApp() {
     createBoardSelector();
     createPinDiagram();
+    registerKeyboardShortcuts();
 }
 
-// Create board selector dropdown
+// ─── Board Selector ───────────────────────────────────────────────
 function createBoardSelector() {
-    const selector = document.getElementById('boardSelector');
-    if (!selector) {
-        const header = document.querySelector('.header') || document.querySelector('header') || document.body;
-        const selectorDiv = document.createElement('div');
-        selectorDiv.className = 'board-selector';
-        selectorDiv.innerHTML = `
-            <label for="boardSelect">Select Board:</label>
-            <select id="boardSelect" onchange="changeBoard(this.value)">
+    const header = document.querySelector('.header');
+    const selectorDiv = document.createElement('div');
+    selectorDiv.className = 'board-selector';
+    selectorDiv.innerHTML = `
+        <label for="boardSelect">Board:</label>
+        <select id="boardSelect" onchange="changeBoard(this.value)">
+            <optgroup label="ESP32 WROOM">
                 <option value="esp32-wroom">ESP32 WROOM (DevKit)</option>
+            </optgroup>
+            <optgroup label="ESP32-S3">
                 <option value="esp32-s3">ESP32-S3</option>
+            </optgroup>
+            <optgroup label="ESP32-C3">
                 <option value="esp32-c3">ESP32-C3 (DevKit)</option>
                 <option value="esp32-c3-mini">ESP32-C3 Super Mini</option>
+            </optgroup>
+        </select>
+        <div class="template-selector-row" id="templateSelectorRow">
+            <label for="templateSelect">Template:</label>
+            <select id="templateSelect" onchange="loadTemplate(this.value)">
+                <option value="">-- Project Template --</option>
             </select>
-            <div id="templateSelector" style="display:none; margin-top: 10px;">
-                <label for="templateSelect">Project Template:</label>
-                <select id="templateSelect" onchange="loadTemplate(this.value)">
-                    <option value="">-- Select Template --</option>
-                    <option value="tft-display">TFT Display with Buttons</option>
-                    <option value="basic-blink">Basic LED Blink</option>
-                    <option value="button-control">Button Control</option>
-                </select>
-            </div>
-        `;
-        if (header.tagName === 'HEADER' || header.className.includes('header')) {
-            header.appendChild(selectorDiv);
-        } else {
-            document.body.insertBefore(selectorDiv, document.body.firstChild);
-        }
-    }
+        </div>
+    `;
+    header.appendChild(selectorDiv);
+    populateTemplates('esp32-wroom');
 }
 
-// Change board and refresh pin diagram
+function populateTemplates(boardKey) {
+    const sel = document.getElementById('templateSelect');
+    if (!sel) return;
+    sel.innerHTML = '<option value="">-- Project Template --</option>';
+    const templates = projectTemplates[boardKey] || {};
+    Object.entries(templates).forEach(([key, tpl]) => {
+        const opt = document.createElement('option');
+        opt.value = key;
+        opt.textContent = tpl.name;
+        sel.appendChild(opt);
+    });
+}
+
 function changeBoard(boardType) {
     currentBoard = boardType;
     pinConfigurations = {};
     selectedPin = null;
     createPinDiagram();
     document.getElementById('pinConfig').innerHTML = '<p>Select a pin to configure</p>';
-    
-    // Show template selector only for C3 Mini
-    const templateSelector = document.getElementById('templateSelector');
-    if (templateSelector) {
-        templateSelector.style.display = (boardType === 'esp32-c3-mini') ? 'block' : 'none';
-    }
+    populateTemplates(boardType);
+    document.getElementById('templateSelect').value = '';
 }
 
-// Load C3 Mini project template
 function loadTemplate(templateKey) {
     if (!templateKey) return;
-    
-    const template = c3MiniTemplates[templateKey];
-    if (template) {
-        document.getElementById('codeEditor').value = template.code;
-        const output = document.getElementById('output');
-        output.innerHTML = `<span class="success">✅ Loaded template: ${template.name}\n${template.description}</span>`;
-    }
+    const tpl = (projectTemplates[currentBoard] || {})[templateKey];
+    if (!tpl) return;
+    document.getElementById('codeEditor').value = tpl.code;
+    appendOutput(`<span class="success">✅ Loaded template: ${tpl.name}\n${tpl.description}</span>`);
 }
 
-// Create the ESP32 pin diagram
+// ─── Pin Diagram ─────────────────────────────────────────────────
 function createPinDiagram() {
     const diagram = document.getElementById('pinDiagram');
     diagram.innerHTML = '';
-    
+
     const board = boardDefinitions[currentBoard];
     const boardTitle = document.createElement('h3');
     boardTitle.textContent = board.name;
-    boardTitle.style.marginBottom = '15px';
-    boardTitle.style.textAlign = 'center';
     diagram.appendChild(boardTitle);
 
     Object.entries(board.pins).forEach(([pinNumber, pinData]) => {
         const pinButton = document.createElement('div');
         pinButton.className = 'pin-button';
-        pinButton.onclick = () => selectPin(pinNumber);
+        pinButton.dataset.pin = pinNumber;
+        pinButton.onclick = (e) => selectPin(pinNumber, e);
         pinButton.innerHTML = `
             <div class="pin-name">${pinData.name}</div>
             <div class="pin-type">${pinData.type}</div>
@@ -379,77 +690,42 @@ function createPinDiagram() {
     });
 }
 
-// Select a pin and show its configuration options
-function selectPin(pinNumber) {
+function selectPin(pinNumber, event) {
     document.querySelectorAll('.pin-button').forEach(btn => btn.classList.remove('selected'));
-    event.target.closest('.pin-button').classList.add('selected');
+    const target = event.target.closest('.pin-button');
+    if (target) target.classList.add('selected');
     selectedPin = pinNumber;
     showPinConfiguration(pinNumber);
 }
 
-// Show configuration options for selected pin
 function showPinConfiguration(pinNumber) {
     const board = boardDefinitions[currentBoard];
     const pinData = board.pins[pinNumber];
     const configPanel = document.getElementById('pinConfig');
-    
+    const rules = boardValidationRules[currentBoard];
+    const isInputOnly = rules && rules.inputOnlyPins.includes(parseInt(pinNumber));
+
     let configHTML = `
         <div class="config-section">
             <h4>Pin ${pinData.name} Configuration</h4>
+            ${isInputOnly ? '<p style="color:#e53e3e;font-size:0.85em;margin-bottom:8px;">⚠️ This pin is INPUT ONLY</p>' : ''}
             <div class="input-group">
                 <label>Pin Mode:</label>
                 <select id="pinMode_${pinNumber}" onchange="updatePinConfig(${pinNumber})">
                     <option value="">Select Mode...</option>
     `;
-    
+
+    const added = new Set();
     pinData.capabilities.forEach(capability => {
-        switch(capability) {
-            case 'Digital I/O':
-                configHTML += '<option value="INPUT">Digital Input</option>';
-                configHTML += '<option value="OUTPUT">Digital Output</option>';
-                configHTML += '<option value="INPUT_PULLUP">Input with Pullup</option>';
-                break;
-            case 'PWM':
-                configHTML += '<option value="PWM">PWM Output</option>';
-                break;
-            case 'ADC1':
-            case 'ADC2':
-                configHTML += '<option value="ANALOG">Analog Input</option>';
-                break;
-            case 'SPI SCK':
-                configHTML += '<option value="SPI_SCK">SPI Clock</option>';
-                break;
-            case 'SPI MISO':
-                configHTML += '<option value="SPI_MISO">SPI Master In</option>';
-                break;
-            case 'SPI MOSI':
-                configHTML += '<option value="SPI_MOSI">SPI Master Out</option>';
-                break;
-            case 'SPI CS':
-                configHTML += '<option value="SPI_CS">SPI Chip Select</option>';
-                break;
-            case 'I2C SDA':
-                configHTML += '<option value="I2C_SDA">I2C Data</option>';
-                break;
-            case 'I2C SCL':
-                configHTML += '<option value="I2C_SCL">I2C Clock</option>';
-                break;
-            case 'UART TX':
-                configHTML += '<option value="UART_TX">UART Transmit</option>';
-                break;
-            case 'UART RX':
-                configHTML += '<option value="UART_RX">UART Receive</option>';
-                break;
-            case 'Built-in LED':
-                configHTML += '<option value="LED">Built-in LED</option>';
-                break;
-            case 'Boot Pin':
-            case 'Boot Button':
-                configHTML += '<option value="BOOT">Boot Button</option>';
-                break;
-        }
+        const opts = capabilityToOptions(capability, isInputOnly);
+        opts.forEach(o => {
+            if (!added.has(o.value)) {
+                added.add(o.value);
+                configHTML += `<option value="${o.value}">${o.label}</option>`;
+            }
+        });
     });
-    
+
     configHTML += `
                 </select>
             </div>
@@ -463,236 +739,465 @@ function showPinConfiguration(pinNumber) {
             </div>
         </div>
     `;
-    
+
     configPanel.innerHTML = configHTML;
+
+    // Restore saved values
+    if (pinConfigurations[pinNumber]) {
+        const cfg = pinConfigurations[pinNumber];
+        const modeEl = document.getElementById(`pinMode_${pinNumber}`);
+        const varEl  = document.getElementById(`varName_${pinNumber}`);
+        const descEl = document.getElementById(`description_${pinNumber}`);
+        if (modeEl) modeEl.value = cfg.mode;
+        if (varEl)  varEl.value  = cfg.varName;
+        if (descEl) descEl.value = cfg.description;
+    }
 }
 
-// Update pin configuration
+function capabilityToOptions(capability, isInputOnly) {
+    const opts = [];
+    switch (capability) {
+        case 'Digital I/O':
+            opts.push({ value: 'INPUT',        label: 'Digital Input' });
+            opts.push({ value: 'INPUT_PULLUP',  label: 'Input with Pullup' });
+            if (!isInputOnly) opts.push({ value: 'OUTPUT', label: 'Digital Output' });
+            break;
+        case 'PWM':
+            if (!isInputOnly) opts.push({ value: 'PWM', label: 'PWM Output' });
+            break;
+        case 'ADC1': case 'ADC2': case 'Analog Input':
+            opts.push({ value: 'ANALOG', label: 'Analog Input' });
+            break;
+        case 'DAC1': opts.push({ value: 'DAC1', label: 'DAC Output (Ch1)' }); break;
+        case 'DAC2': opts.push({ value: 'DAC2', label: 'DAC Output (Ch2)' }); break;
+        case 'SPI SCK':  opts.push({ value: 'SPI_SCK',  label: 'SPI Clock' }); break;
+        case 'SPI MISO': opts.push({ value: 'SPI_MISO', label: 'SPI MISO' }); break;
+        case 'SPI MOSI': opts.push({ value: 'SPI_MOSI', label: 'SPI MOSI' }); break;
+        case 'SPI CS':   opts.push({ value: 'SPI_CS',   label: 'SPI Chip Select' }); break;
+        case 'I2C SDA':  opts.push({ value: 'I2C_SDA',  label: 'I2C Data (SDA)' }); break;
+        case 'I2C SCL':  opts.push({ value: 'I2C_SCL',  label: 'I2C Clock (SCL)' }); break;
+        case 'UART TX':  opts.push({ value: 'UART_TX',  label: 'UART Transmit' }); break;
+        case 'UART RX':  opts.push({ value: 'UART_RX',  label: 'UART Receive' }); break;
+        case 'Built-in LED': opts.push({ value: 'LED', label: 'Built-in LED' }); break;
+        case 'RGB LED':  opts.push({ value: 'RGB_LED', label: 'RGB NeoPixel' }); break;
+        case 'Boot Pin': case 'Boot Button':
+            opts.push({ value: 'BOOT', label: 'Boot Button (read only)' }); break;
+        case 'Touch':    opts.push({ value: 'TOUCH', label: 'Capacitive Touch' }); break;
+        case 'USB D-':   opts.push({ value: 'USB_DM', label: 'USB D-' }); break;
+        case 'USB D+':   opts.push({ value: 'USB_DP', label: 'USB D+' }); break;
+    }
+    return opts;
+}
+
 function updatePinConfig(pinNumber) {
-    const pinMode = document.getElementById(`pinMode_${pinNumber}`).value;
-    const varName = document.getElementById(`varName_${pinNumber}`).value;
-    const description = document.getElementById(`description_${pinNumber}`).value;
-    
     const board = boardDefinitions[currentBoard];
     pinConfigurations[pinNumber] = {
         pin: board.pins[pinNumber],
-        mode: pinMode,
-        varName: varName,
-        description: description
+        mode: document.getElementById(`pinMode_${pinNumber}`)?.value || '',
+        varName: document.getElementById(`varName_${pinNumber}`)?.value || '',
+        description: document.getElementById(`description_${pinNumber}`)?.value || ''
     };
 }
 
-// Generate template code based on pin configurations
+// ─── Template Generator ───────────────────────────────────────────
 function generateTemplate() {
     const board = boardDefinitions[currentBoard];
-    let templateCode = `// Auto-generated ${board.name} code template\n`;
-    templateCode += `// Board: ${board.name}\n\n`;
-    
+    const arch  = board.arch;
+    let code = `// Auto-generated ${board.name} code template\n// Board: ${board.name}\n\n`;
+
     Object.entries(pinConfigurations).forEach(([pinNumber, config]) => {
         if (config.varName && config.mode) {
-            templateCode += `const int ${config.varName} = ${pinNumber}; // ${config.description || config.pin.name}\n`;
+            code += `const int ${config.varName} = ${pinNumber}; // ${config.description || config.pin.name}\n`;
         }
     });
-    
-    templateCode += '\nvoid setup() {\n';
-    templateCode += '  Serial.begin(115200);\n\n';
-    
+
+    code += '\nvoid setup() {\n  Serial.begin(115200);\n\n';
+
     Object.entries(pinConfigurations).forEach(([pinNumber, config]) => {
-        if (config.varName && config.mode) {
-            switch(config.mode) {
-                case 'INPUT':
-                case 'OUTPUT':
-                case 'INPUT_PULLUP':
-                    templateCode += `  pinMode(${config.varName}, ${config.mode});\n`;
-                    break;
-                case 'PWM':
-                    if (currentBoard.includes('c3')) {
-                        templateCode += `  // Configure PWM for ${config.varName}\n`;
-                        templateCode += `  ledcSetup(0, 5000, 8); // channel, frequency, resolution\n`;
-                        templateCode += `  ledcAttachPin(${config.varName}, 0);\n`;
-                    } else {
-                        templateCode += `  // Configure PWM for ${config.varName}\n`;
-                        templateCode += `  ledcSetup(0, 5000, 8);\n`;
-                        templateCode += `  ledcAttachPin(${config.varName}, 0);\n`;
-                    }
-                    break;
-                case 'ANALOG':
-                    templateCode += `  // ${config.varName} configured for analog input\n`;
-                    if (currentBoard.includes('c3')) {
-                        templateCode += `  analogReadResolution(12); // 12-bit ADC\n`;
-                    }
-                    break;
-            }
+        if (!config.varName || !config.mode) return;
+        switch (config.mode) {
+            case 'INPUT': case 'OUTPUT': case 'INPUT_PULLUP':
+                code += `  pinMode(${config.varName}, ${config.mode});\n`;
+                break;
+            case 'PWM':
+                code += `  // PWM for ${config.varName}\n`;
+                code += `  ledcSetup(0, 5000, 8);\n`;
+                code += `  ledcAttachPin(${config.varName}, 0);\n`;
+                break;
+            case 'ANALOG':
+                code += `  // ${config.varName} is analog input\n`;
+                code += `  analogReadResolution(12);\n`;
+                break;
+            case 'DAC1': case 'DAC2':
+                code += `  // ${config.varName} is DAC output\n`;
+                break;
         }
     });
-    
-    templateCode += '}\n\nvoid loop() {\n';
-    templateCode += '  // Your main code here\n';
-    templateCode += '  delay(1000);\n';
-    templateCode += '}';
-    
-    document.getElementById('codeEditor').value = templateCode;
+
+    code += '}\n\nvoid loop() {\n  // Your main code here\n  delay(1000);\n}';
+    document.getElementById('codeEditor').value = code;
 }
 
-// Save code to .ino file
+// ─── Save / Clear ─────────────────────────────────────────────────
 function saveCodeToFile() {
     const code = document.getElementById('codeEditor').value;
     const board = boardDefinitions[currentBoard];
     const filename = `esp32_sketch_${board.name.replace(/\s+/g, '_').toLowerCase()}.ino`;
-    
     const blob = new Blob([code], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    
-    const output = document.getElementById('output');
-    output.innerHTML = `<span class="success">✅ Saved file: ${filename}</span>`;
+    appendOutput(`<span class="success">✅ Saved: ${filename}</span>`);
 }
 
-// Flash code to ESP32 using Web Serial
-async function flashToESP32() {
-    const output = document.getElementById('output');
-    
-    // Check if Web Serial is supported
-    if (!('serial' in navigator)) {
-        output.innerHTML = `<span class="error">❌ Web Serial API not supported in this browser.\nPlease use Chrome, Edge, or Opera.</span>`;
-        return;
-    }
-    
-    try {
-        // Request port
-        port = await navigator.serial.requestPort();
-        
-        // Open port
-        await port.open({ baudRate: 115200 });
-        
-        output.innerHTML = `<span class="success">✅ Connected to ESP32!\n📡 Serial port opened at 115200 baud\n\n⚠️ Note: This tool opens serial connection for monitoring.\nTo flash firmware, use Arduino IDE or esptool.py\n\nSerial Monitor Active...</span>`;
-        
-        // Set up reader for incoming data
-        const textDecoder = new TextDecoderStream();
-        const readableStreamClosed = port.readable.pipeTo(textDecoder.writable);
-        reader = textDecoder.readable.getReader();
-        
-        // Read serial data
-        readSerialData();
-        
-    } catch (error) {
-        output.innerHTML = `<span class="error">❌ Error connecting to ESP32:\n${error.message}\n\nMake sure:\n1. ESP32 is connected via USB\n2. No other program is using the serial port\n3. You granted permission in the browser</span>`;
-    }
-}
-
-// Read serial data from ESP32
-async function readSerialData() {
-    const output = document.getElementById('output');
-    try {
-        while (true) {
-            const { value, done } = await reader.read();
-            if (done) {
-                reader.releaseLock();
-                break;
-            }
-            if (value) {
-                const currentOutput = output.innerHTML;
-                const successMatch = currentOutput.match(/<span class="success">(.*?)<\/span>/s);
-                if (successMatch) {
-                    output.innerHTML = `<span class="success">${successMatch[1]}\n${value}</span>`;
-                } else {
-                    output.innerHTML += `\n${value}`;
-                }
-                // Auto-scroll to bottom
-                output.scrollTop = output.scrollHeight;
-            }
-        }
-    } catch (error) {
-        console.error('Error reading serial:', error);
-    }
-}
-
-// Clear code editor
 function clearCode() {
     document.getElementById('codeEditor').value = '';
 }
 
-// Validate Arduino code
-function validateCode() {
-    const code = document.getElementById('codeEditor').value;
-    const output = document.getElementById('output');
-    let validationResults = [];
-    let hasErrors = false;
-    
-    if (!code.trim()) {
-        validationResults.push('⚠️ No code to validate');
-        output.innerHTML = validationResults.join('\n');
-        return;
-    }
-    
-    if (!code.includes('void setup()')) {
-        validationResults.push('❌ ERROR: Missing void setup() function');
-        hasErrors = true;
-    }
-    
-    if (!code.includes('void loop()')) {
-        validationResults.push('❌ ERROR: Missing void loop() function');
-        hasErrors = true;
-    }
-    
-    const openBraces = (code.match(/{/g) || []).length;
-    const closeBraces = (code.match(/}/g) || []).length;
-    if (openBraces !== closeBraces) {
-        validationResults.push(`❌ ERROR: Unbalanced braces (${openBraces} open, ${closeBraces} close)`);
-        hasErrors = true;
-    }
-    
-    const openParens = (code.match(/\(/g) || []).length;
-    const closeParens = (code.match(/\)/g) || []).length;
-    if (openParens !== closeParens) {
-        validationResults.push(`❌ ERROR: Unbalanced parentheses (${openParens} open, ${closeParens} close)`);
-        hasErrors = true;
-    }
-    
-    if (code.includes('Serial.') && !code.includes('Serial.begin')) {
-        validationResults.push('⚠️ WARNING: Using Serial without Serial.begin() in setup()');
-    }
-    
-    const usedPins = [];
-    Object.entries(pinConfigurations).forEach(([pinNumber, config]) => {
-        if (config.varName && code.includes(config.varName)) {
-            usedPins.push(`✅ Pin ${pinNumber} (${config.varName}) configured and used`);
-        }
-    });
-    
-    const esp32Functions = ['digitalWrite', 'digitalRead', 'analogRead', 'analogWrite', 'pinMode'];
-    const usedFunctions = esp32Functions.filter(func => code.includes(func));
-    
-    if (usedFunctions.length > 0) {
-        validationResults.push(`✅ Using ESP32 functions: ${usedFunctions.join(', ')}`);
-    }
-    
-    if (!hasErrors) {
-        validationResults.push('\n🎉 CODE VALIDATION PASSED!');
-        validationResults.push('✅ Basic syntax appears correct');
-        validationResults.push('✅ Required functions present');
-        validationResults.push(`✅ Board: ${boardDefinitions[currentBoard].name}`);
-        
-        if (usedPins.length > 0) {
-            validationResults.push('\n📌 Pin Usage:');
-            validationResults.push(...usedPins);
-        }
-        
-        const codeSize = code.length;
-        validationResults.push(`\n📊 Estimated code size: ~${codeSize} characters`);
-        output.innerHTML = `<span class="success">${validationResults.join('\n')}</span>`;
+function clearOutput() {
+    if (activeTab === 'output') {
+        document.getElementById('output').textContent = '';
     } else {
-        validationResults.push('\n❌ CODE VALIDATION FAILED');
-        validationResults.push('Please fix the errors above before uploading to ESP32');
-        output.innerHTML = `<span class="error">${validationResults.join('\n')}</span>`;
+        document.getElementById('terminalOutput').textContent = '';
     }
 }
 
-// Initialize the app when page loads
+// ─── Output helpers ───────────────────────────────────────────────
+function appendOutput(html) {
+    const el = document.getElementById('output');
+    el.innerHTML += (el.innerHTML ? '\n' : '') + html;
+    el.scrollTop = el.scrollHeight;
+}
+
+function appendTerminal(text, cls = '') {
+    const el = document.getElementById('terminalOutput');
+    const line = document.createElement('div');
+    if (cls) line.className = cls;
+    line.textContent = text;
+    el.appendChild(line);
+    el.scrollTop = el.scrollHeight;
+}
+
+// ─── Tab Toggle ───────────────────────────────────────────────────
+function switchTab(tab) {
+    activeTab = tab;
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
+    document.getElementById('btn' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
+
+    const titles = { output: '📋 Output', terminal: '⬛ Terminal' };
+    document.getElementById('outputPanelTitle').textContent = titles[tab] || tab;
+
+    if (tab === 'terminal') {
+        document.getElementById('terminalInput').focus();
+    }
+}
+
+// ─── Flash / Connect ─────────────────────────────────────────────
+async function flashToESP32() {
+    if (!('serial' in navigator)) {
+        appendOutput(`<span class="error">❌ Web Serial API not supported.\nPlease use Chrome, Edge, or Opera.</span>`);
+        return;
+    }
+
+    try {
+        port = await navigator.serial.requestPort();
+        await port.open({ baudRate: 115200 });
+        isConnected = true;
+
+        document.getElementById('continueFlashBtn').disabled = false;
+        appendOutput(`<span class="success">✅ Connected to ESP32!\n📡 Serial port opened at 115200 baud\n\nSwitch to Terminal tab to interact with the device.\nPress "Continue Flash" to send your editor code.</span>`);
+        appendTerminal('✅ Serial port connected at 115200 baud', 'success');
+        appendTerminal('Type commands below or press "Continue Flash" to upload code.', 'info');
+
+        // Switch to terminal tab automatically
+        switchTab('terminal');
+
+        // Set up streams
+        const textDecoder = new TextDecoderStream();
+        port.readable.pipeTo(textDecoder.writable);
+        reader = textDecoder.readable.getReader();
+
+        const textEncoder = new TextEncoderStream();
+        textEncoder.readable.pipeTo(port.writable);
+        writer = textEncoder.writable.getWriter();
+
+        readSerialData();
+
+    } catch (error) {
+        appendOutput(`<span class="error">❌ Error connecting:\n${error.message}</span>`);
+    }
+}
+
+// Continue Flash: send the editor code to the serial port
+async function continueFlash() {
+    if (!isConnected || !writer) {
+        appendOutput(`<span class="error">❌ Not connected. Click "Flash / Connect" first.</span>`);
+        return;
+    }
+
+    const code = document.getElementById('codeEditor').value.trim();
+    if (!code) {
+        appendOutput(`<span class="warning">⚠️ Code editor is empty.</span>`);
+        return;
+    }
+
+    try {
+        await writer.write(code + '\n');
+        appendTerminal('>>> Code sent to device via serial.', 'success');
+        appendOutput(`<span class="success">✅ Code transmitted to ESP32 via serial.\n(Note: Full OTA flash requires esptool.py or Arduino IDE.)</span>`);
+    } catch (err) {
+        appendTerminal(`Error sending code: ${err.message}`, 'error');
+    }
+}
+
+// Disconnect serial
+async function disconnectSerial() {
+    isConnected = false;
+    document.getElementById('continueFlashBtn').disabled = true;
+    try { if (reader) { await reader.cancel(); reader = null; } } catch (_) {}
+    try { if (writer) { await writer.close(); writer = null; } } catch (_) {}
+    try { if (port)   { await port.close(); port = null; } } catch (_) {}
+    appendTerminal('🔌 Disconnected from serial port.', 'warning');
+    appendOutput(`<span class="warning">🔌 Serial port disconnected.</span>`);
+}
+
+// Read incoming serial data
+async function readSerialData() {
+    try {
+        while (true) {
+            const { value, done } = await reader.read();
+            if (done) { reader.releaseLock(); break; }
+            if (value) {
+                appendTerminal(value.trimEnd());
+                // Also mirror to output tab
+                const el = document.getElementById('output');
+                el.innerHTML += `\n<span class="info">${escapeHtml(value.trimEnd())}</span>`;
+                el.scrollTop = el.scrollHeight;
+            }
+        }
+    } catch (err) {
+        appendTerminal(`Serial read error: ${err.message}`, 'error');
+    }
+}
+
+function escapeHtml(str) {
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// ─── Terminal Input ───────────────────────────────────────────────
+function handleTerminalInput(event) {
+    const input = document.getElementById('terminalInput');
+    if (event.key === 'Enter') {
+        sendTerminalCommand();
+    } else if (event.key === 'ArrowUp') {
+        event.preventDefault();
+        if (historyIndex < terminalHistory.length - 1) {
+            historyIndex++;
+            input.value = terminalHistory[terminalHistory.length - 1 - historyIndex];
+        }
+    } else if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        if (historyIndex > 0) {
+            historyIndex--;
+            input.value = terminalHistory[terminalHistory.length - 1 - historyIndex];
+        } else {
+            historyIndex = -1;
+            input.value = '';
+        }
+    } else if (event.ctrlKey && event.key === 'l') {
+        event.preventDefault();
+        document.getElementById('terminalOutput').textContent = '';
+    } else if (event.ctrlKey && event.key === 'c') {
+        // Send interrupt byte
+        if (writer) writer.write('\x03');
+        appendTerminal('^C', 'warning');
+    }
+}
+
+async function sendTerminalCommand() {
+    const input = document.getElementById('terminalInput');
+    const cmd = input.value.trim();
+    if (!cmd) return;
+
+    terminalHistory.push(cmd);
+    historyIndex = -1;
+    input.value = '';
+
+    appendTerminal(`> ${cmd}`, 'info');
+
+    if (!isConnected || !writer) {
+        appendTerminal('⚠️ Not connected. Click "Flash / Connect" first.', 'warning');
+        return;
+    }
+
+    try {
+        await writer.write(cmd + '\r\n');
+    } catch (err) {
+        appendTerminal(`Send error: ${err.message}`, 'error');
+    }
+}
+
+function pasteCommand(cmd) {
+    const input = document.getElementById('terminalInput');
+    if (input) {
+        input.value = cmd;
+        input.focus();
+        closeShortcutsPanel();
+        switchTab('terminal');
+    }
+}
+
+// ─── Shortcuts Modal ─────────────────────────────────────────────
+function openShortcutsPanel() {
+    document.getElementById('shortcutsModal').classList.add('open');
+}
+
+function closeShortcutsPanel() {
+    document.getElementById('shortcutsModal').classList.remove('open');
+}
+
+function closeShortcutsModal(event) {
+    if (event.target === document.getElementById('shortcutsModal')) {
+        closeShortcutsPanel();
+    }
+}
+
+// ─── Keyboard Shortcuts ───────────────────────────────────────────
+function registerKeyboardShortcuts() {
+    document.addEventListener('keydown', (e) => {
+        // Ctrl+Shift+C → Connect
+        if (e.ctrlKey && e.shiftKey && e.key === 'C') { e.preventDefault(); flashToESP32(); }
+        // Ctrl+Shift+D → Disconnect
+        if (e.ctrlKey && e.shiftKey && e.key === 'D') { e.preventDefault(); disconnectSerial(); }
+        // Ctrl+Shift+F → Continue Flash
+        if (e.ctrlKey && e.shiftKey && e.key === 'F') { e.preventDefault(); continueFlash(); }
+        // Escape → close modal
+        if (e.key === 'Escape') closeShortcutsPanel();
+    });
+}
+
+// ─── Validator ────────────────────────────────────────────────────
+function validateCode() {
+    const code = document.getElementById('codeEditor').value;
+    const board = boardDefinitions[currentBoard];
+    const rules = boardValidationRules[currentBoard];
+    let results = [];
+    let hasErrors = false;
+
+    if (!code.trim()) {
+        appendOutput('<span class="warning">⚠️ No code to validate.</span>');
+        return;
+    }
+
+    results.push(`🔍 Validating for board: ${board.name}\n`);
+
+    // ── Required structure
+    if (!code.includes('void setup()')) {
+        results.push('❌ ERROR: Missing void setup() function');
+        hasErrors = true;
+    } else {
+        results.push('✅ void setup() found');
+    }
+
+    if (!code.includes('void loop()')) {
+        results.push('❌ ERROR: Missing void loop() function');
+        hasErrors = true;
+    } else {
+        results.push('✅ void loop() found');
+    }
+
+    // ── Braces / Parens
+    const openBraces  = (code.match(/{/g) || []).length;
+    const closeBraces = (code.match(/}/g) || []).length;
+    if (openBraces !== closeBraces) {
+        results.push(`❌ ERROR: Unbalanced braces (${openBraces} open, ${closeBraces} close)`);
+        hasErrors = true;
+    } else {
+        results.push(`✅ Braces balanced (${openBraces} pairs)`);
+    }
+
+    const openParens  = (code.match(/\(/g) || []).length;
+    const closeParens = (code.match(/\)/g) || []).length;
+    if (openParens !== closeParens) {
+        results.push(`❌ ERROR: Unbalanced parentheses (${openParens} open, ${closeParens} close)`);
+        hasErrors = true;
+    } else {
+        results.push(`✅ Parentheses balanced`);
+    }
+
+    // ── Serial.begin check
+    if (code.includes('Serial.') && !code.includes('Serial.begin')) {
+        results.push('⚠️ WARNING: Serial used but Serial.begin() not found in setup()');
+    }
+
+    // ── Board-specific: analogWrite not available on ESP32
+    if (rules && rules.noAnalogWrite && code.includes('analogWrite(')) {
+        results.push(`⚠️ WARNING: analogWrite() is NOT available on ${board.name}.\n   Use ledcWrite() instead. (${rules.pwmApi})`);
+    }
+
+    // ── Board-specific: input-only pins used as OUTPUT
+    if (rules && rules.inputOnlyPins.length > 0) {
+        rules.inputOnlyPins.forEach(p => {
+            const pinRegex = new RegExp(`pinMode\\s*\\(\\s*${p}\\s*,\\s*OUTPUT\\s*\\)`, 'g');
+            if (pinRegex.test(code)) {
+                results.push(`❌ ERROR: GPIO${p} is INPUT ONLY on ${board.name} — cannot use as OUTPUT.`);
+                hasErrors = true;
+            }
+        });
+    }
+
+    // ── Board notes
+    if (rules && rules.notes.length > 0) {
+        results.push('\n📌 Board-specific notes:');
+        rules.notes.forEach(n => results.push('  ' + n));
+    }
+
+    // ── Arduino functions used
+    const arduinoFns = ['digitalWrite', 'digitalRead', 'analogRead', 'analogWrite', 'pinMode', 'delay', 'millis', 'ledcWrite', 'ledcSetup', 'ledcAttachPin'];
+    const usedFns = arduinoFns.filter(fn => code.includes(fn));
+    if (usedFns.length > 0) {
+        results.push(`\n✅ Functions detected: ${usedFns.join(', ')}`);
+    }
+
+    // ── Configured pins used
+    const usedPins = [];
+    Object.entries(pinConfigurations).forEach(([pinNumber, config]) => {
+        if (config.varName && code.includes(config.varName)) {
+            usedPins.push(`  ✅ GPIO${pinNumber} (${config.varName}) — configured & used`);
+        }
+    });
+    if (usedPins.length > 0) {
+        results.push('\n📌 Configured Pin Usage:');
+        results.push(...usedPins);
+    }
+
+    // ── .ino style checks
+    results.push('\n📄 .ino style checks:');
+    if (!code.includes('#include') && (code.includes('WiFi') || code.includes('Wire') || code.includes('SPI'))) {
+        results.push('  ⚠️ Library functions detected but no #include found — add required headers.');
+    } else {
+        results.push('  ✅ Include structure looks OK');
+    }
+
+    // ── Size estimate
+    results.push(`\n📊 Code size estimate: ~${code.length} chars / ~${Math.ceil(code.length / 1024)} KB`);
+
+    if (!hasErrors) {
+        results.push('\n🎉 VALIDATION PASSED — code structure is valid for ' + board.name);
+        document.getElementById('output').innerHTML = `<span class="success">${results.join('\n')}</span>`;
+    } else {
+        results.push('\n❌ VALIDATION FAILED — fix the errors above before uploading.');
+        document.getElementById('output').innerHTML = `<span class="error">${results.join('\n')}</span>`;
+    }
+
+    // Switch to output tab to show results
+    switchTab('output');
+}
+
+// ─── Boot ─────────────────────────────────────────────────────────
 window.onload = initializeApp;

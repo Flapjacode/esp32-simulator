@@ -1,0 +1,79 @@
+    <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="ESP32 Pin Configuration Simulator - Configure pins, write code, and test without hardware">
+    <meta name="author" content="Matthew Shannon">
+    <title>ESP32 Simulator - Pin Configuration & Code Testing</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>ESP32 Simulator</h1>
+            <p>Configure pins, write code, and test without hardware</p>
+            <!-- Board selector will be dynamically inserted here by JavaScript -->
+        </div>
+
+        <div class="main-grid">
+            <!-- Left Panel: Pin Configuration -->
+            <div class="panel">
+                <h2>ESP32 Pin Configuration</h2>
+                <div class="esp32-diagram" id="pinDiagram">
+                    <!-- Pins will be generated dynamically by JavaScript -->
+                </div>
+                <div class="pin-config" id="pinConfig">
+                    <p>Select a pin to configure its settings</p>
+                </div>
+            </div>
+
+            <!-- Right Panel: Code Editor -->
+            <div class="panel">
+                <h2>Arduino Code</h2>
+                <textarea 
+                    class="code-editor" 
+                    id="codeEditor" 
+                    placeholder="// Write your Arduino code here
+void setup() {
+  Serial.begin(115200);
+  // Your setup code here
+}
+
+void loop() {
+  // Your main code here
+  delay(1000);
+}"
+                     spellcheck="false"
+                ></textarea>
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="validateCode()" title="Check code for errors">
+                        Validate Code
+                    </button>
+                    <button class="btn btn-secondary" onclick="generateTemplate()" title="Generate code template from pin configuration">
+                        Generate Template
+                    </button>
+                    <button class="btn btn-success" onclick="saveCodeToFile()" title="Save code to .ino file">
+                        Save File
+                    </button>
+                    <button class="btn btn-warning" onclick="flashToESP32()" title="Flash code to ESP32 via Web Serial">
+                        Flash to ESP32
+                    </button>
+                    <button class="btn btn-secondary" onclick="clearCode()" title="Clear code editor">
+                        Clear
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Panel: Validation Output -->
+        <div class="panel output-panel">
+            <h2>📋 Validation Output</h2>
+            <div class="output" id="output">Ready to validate your code...</div>
+        </div>
+    </div>
+
+    <!-- Load JavaScript -->
+    <script src="script.js"></script>
+</body>
+</html>

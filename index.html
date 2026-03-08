@@ -1,4 +1,4 @@
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -56,8 +56,14 @@ void loop() {
                     <button class="btn btn-success" onclick="saveCodeToFile()" title="Save code to .ino file">
                         Save File
                     </button>
-                    <button class="btn btn-warning" onclick="flashToESP32()" title="Flash code to ESP32 via Web Serial">
-                        Flash to ESP32
+                    <button class="btn btn-warning" id="flashBtn" onclick="flashToESP32()" title="Connect to ESP32 via Web Serial">
+                        Flash / Connect
+                    </button>
+                    <button class="btn btn-flash-continue" id="continueFlashBtn" onclick="continueFlash()" title="Send code in editor to connected ESP32 terminal" disabled>
+                        &#9654; Continue Flash
+                    </button>
+                    <button class="btn btn-info" onclick="openShortcutsPanel()" title="Serial/Terminal shortcuts reference">
+                        Serial Shortcuts
                     </button>
                     <button class="btn btn-secondary" onclick="clearCode()" title="Clear code editor">
                         Clear
@@ -66,10 +72,70 @@ void loop() {
             </div>
         </div>
 
-        <!-- Bottom Panel: Validation Output -->
+        <!-- Bottom Panel: Output / Terminal -->
         <div class="panel output-panel">
-            <h2>📋 Validation Output</h2>
-            <div class="output" id="output">Ready to validate your code...</div>
+            <div class="output-header">
+                <h2 id="outputPanelTitle">📋 Output</h2>
+                <div class="output-toggle">
+                    <button class="toggle-btn active" id="btnOutput" onclick="switchTab('output')">Output</button>
+                    <button class="toggle-btn" id="btnTerminal" onclick="switchTab('terminal')">Terminal</button>
+                </div>
+                <button class="btn btn-sm btn-secondary" onclick="clearOutput()" title="Clear output panel">Clear</button>
+            </div>
+
+            <!-- Output Tab -->
+            <div id="tabOutput" class="tab-content active">
+                <div class="output" id="output">Ready to validate your code...</div>
+            </div>
+
+            <!-- Terminal Tab -->
+            <div id="tabTerminal" class="tab-content">
+                <div class="output terminal-output" id="terminalOutput">Terminal inactive. Connect via Flash / Connect button first...</div>
+                <div class="terminal-input-row">
+                    <span class="terminal-prompt">&#x276F;</span>
+                    <input type="text" class="terminal-input" id="terminalInput" placeholder="Type command and press Enter..." onkeydown="handleTerminalInput(event)" />
+                    <button class="btn btn-sm btn-primary" onclick="sendTerminalCommand()">Send</button>
+                    <button class="btn btn-sm btn-secondary" onclick="disconnectSerial()" title="Disconnect serial port">Disconnect</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Shortcuts Modal -->
+        <div class="modal-overlay" id="shortcutsModal" onclick="closeShortcutsModal(event)">
+            <div class="modal-box">
+                <div class="modal-header">
+                    <span>&#9881; Serial / Terminal Shortcuts</span>
+                    <button class="modal-close" onclick="closeShortcutsPanel()">&#10005;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="shortcut-group">
+                        <div class="shortcut-group-title">Connection</div>
+                        <div class="shortcut-row"><kbd>Ctrl+Shift+C</kbd><span>Connect / Open Serial Port</span></div>
+                        <div class="shortcut-row"><kbd>Ctrl+Shift+D</kbd><span>Disconnect Serial Port</span></div>
+                        <div class="shortcut-row"><kbd>Ctrl+Shift+F</kbd><span>Continue Flash (send code)</span></div>
+                    </div>
+                    <div class="shortcut-group">
+                        <div class="shortcut-group-title">Terminal Commands</div>
+                        <div class="shortcut-row"><kbd>Enter</kbd><span>Send command</span></div>
+                        <div class="shortcut-row"><kbd>&#8593; / &#8595;</kbd><span>Navigate command history</span></div>
+                        <div class="shortcut-row"><kbd>Ctrl+L</kbd><span>Clear terminal</span></div>
+                        <div class="shortcut-row"><kbd>Ctrl+C</kbd><span>Send interrupt signal (0x03)</span></div>
+                    </div>
+                    <div class="shortcut-group">
+                        <div class="shortcut-group-title">Common ESP32 Serial Commands</div>
+                        <div class="shortcut-row cmd-row" onclick="pasteCommand('rst')"><kbd>rst</kbd><span>Soft reset ESP32</span></div>
+                        <div class="shortcut-row cmd-row" onclick="pasteCommand('AT')"><kbd>AT</kbd><span>AT command test (if AT firmware)</span></div>
+                        <div class="shortcut-row cmd-row" onclick="pasteCommand('AT+GMR')"><kbd>AT+GMR</kbd><span>Get firmware version</span></div>
+                        <div class="shortcut-row cmd-row" onclick="pasteCommand('help')"><kbd>help</kbd><span>Show available commands (if IDF)</span></div>
+                    </div>
+                    <div class="shortcut-group">
+                        <div class="shortcut-group-title">Baud Rates</div>
+                        <div class="shortcut-row"><span>115200</span><span>Default / Arduino</span></div>
+                        <div class="shortcut-row"><span>9600</span><span>Legacy / slow devices</span></div>
+                        <div class="shortcut-row"><span>921600</span><span>High-speed flashing</span></div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
