@@ -1081,6 +1081,110 @@ function registerKeyboardShortcuts() {
     });
 }
 
+// ─── Upload Modal State ────────────────────────────────────────────
+let uploadModalOpen = false;
+
+// ─── Upload Modal Functions ───────────────────────────────────────
+function openUploadDialog() {
+    document.getElementById('uploadModal').classList.add('open');
+    uploadModalOpen = true;
+}
+
+function closeUploadModal(event) {
+    if (event && event.target !== document.getElementById('uploadModal')) return;
+    document.getElementById('uploadModal').classList.remove('open');
+    uploadModalOpen = false;
+    // Reset form
+    document.getElementById('uploadFileInput').value = '';
+    document.getElementById('urlInput').value = '';
+}
+
+function switchUploadTab(tab) {
+    // Hide all tabs
+    document.querySelectorAll('.upload-tab-content').forEach(el => {
+        el.classList.remove('active');
+    });
+    document.querySelectorAll('.upload-tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Show selected tab
+    document.getElementById('uploadFileTab').classList.toggle('active', tab === 'file');
+    document.getElementById('uploadUrlTab').classList.toggle('active', tab === 'url');
+    document.querySelectorAll('.upload-tab-btn')[tab === 'file' ? 0 : 1].classList.add('active');
+}
+
+async function loadFromFile() {
+    const fileInput = document.getElementById('uploadFileInput');
+    const file = fileInput.files[0];
+    
+    if (!file) {
+        appendOutput('<span class="warning">⚠️ Please select a file first.</span>');
+        return;
+    }
+    
+    try {
+        const text = await file.text();
+        document.getElementById('codeEditor').value = text;
+        appendOutput(`<span class="success">✅ Loaded file: ${file.name}\nSize: ${(file.size / 1024).toFixed(2)} KB</span>`);
+        closeUploadModal();
+        switchTab('output');
+    } catch (error) {
+        appendOutput(`<span class="error">❌ Error reading file:\n${error.message}</span>`);
+    }
+}
+
+async function loadFromURL() {
+    const url = document.getElementById('urlInput').value.trim();
+    
+    if (!url) {
+        appendOutput('<span class="warning">⚠️ Please enter a URL.</span>');
+        return;
+    }
+    
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        appendOutput('<span class="error">❌ URL must start with http:// or https://</span>');
+        return;
+    }
+    
+    try {
+        appendOutput('<span class="info">⏳ Fetching code from URL...</span>');
+        
+        const response = await fetch(url, {
+            mode: 'cors',
+            cache: 'no-cache'
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const contentType = response.headers.get('content-type');
+        if (!contentType || (!contentType.includes('text') && !contentType.includes('plain'))) {
+            console.warn('Unexpected content type:', contentType);
+        }
+        
+        const text = await response.text();
+        
+        if (!text || text.trim().length === 0) {
+            throw new Error('URL returned empty content');
+        }
+        
+        document.getElementById('codeEditor').value = text;
+        appendOutput(`<span class="success">✅ Loaded code from URL:\n${url}\nSize: ${(text.length / 1024).toFixed(2)} KB</span>`);
+        closeUploadModal();
+        switchTab('output');
+        
+    } catch (error) {
+        appendOutput(`<span class="error">❌ Error loading from URL:\n${error.message}\n\n💡 Tip: The server must allow CORS requests. Some URLs may not work.</span>`);
+    }
+}
+
+// Keyboard shortcut for upload modal
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && uploadModalOpen) closeUploadModal();
+});
+
 // ─── Validator ────────────────────────────────────────────────────
 function validateCode() {
     const code = document.getElementById('codeEditor').value;
