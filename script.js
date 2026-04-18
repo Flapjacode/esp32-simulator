@@ -1086,20 +1086,35 @@ let uploadModalOpen = false;
 
 // ─── Upload Modal Functions ───────────────────────────────────────
 function openUploadDialog() {
-    document.getElementById('uploadModal').classList.add('open');
-    uploadModalOpen = true;
+    const modal = document.getElementById('uploadModal');
+    if (modal) {
+        modal.classList.add('open');
+        uploadModalOpen = true;
+        console.log('📤 Upload modal opened');
+    } else {
+        console.error('❌ Upload modal element not found');
+    }
 }
 
 function closeUploadModal(event) {
-    if (event && event.target !== document.getElementById('uploadModal')) return;
-    document.getElementById('uploadModal').classList.remove('open');
-    uploadModalOpen = false;
-    // Reset form
-    document.getElementById('uploadFileInput').value = '';
-    document.getElementById('urlInput').value = '';
+    // Close modal only if:
+    // 1. No event (called from close button or programmatically)
+    // 2. Event target is the modal overlay itself (clicking outside the box)
+    if (!event || event.target.id === 'uploadModal') {
+        const modal = document.getElementById('uploadModal');
+        if (modal) {
+            modal.classList.remove('open');
+            uploadModalOpen = false;
+            // Reset form
+            document.getElementById('uploadFileInput').value = '';
+            document.getElementById('urlInput').value = '';
+            console.log('📤 Upload modal closed');
+        }
+    }
 }
 
 function switchUploadTab(tab) {
+    console.log(`📑 Switching upload tab to: ${tab}`);
     // Hide all tabs
     document.querySelectorAll('.upload-tab-content').forEach(el => {
         el.classList.remove('active');
@@ -1115,11 +1130,13 @@ function switchUploadTab(tab) {
 }
 
 async function loadFromFile() {
+    console.log('📁 Loading from file...');
     const fileInput = document.getElementById('uploadFileInput');
     const file = fileInput.files[0];
     
     if (!file) {
         appendOutput('<span class="warning">⚠️ Please select a file first.</span>');
+        console.warn('❌ No file selected');
         return;
     }
     
@@ -1127,28 +1144,34 @@ async function loadFromFile() {
         const text = await file.text();
         document.getElementById('codeEditor').value = text;
         appendOutput(`<span class="success">✅ Loaded file: ${file.name}\nSize: ${(file.size / 1024).toFixed(2)} KB</span>`);
+        console.log(`✅ File loaded successfully: ${file.name}`);
         closeUploadModal();
         switchTab('output');
     } catch (error) {
         appendOutput(`<span class="error">❌ Error reading file:\n${error.message}</span>`);
+        console.error('❌ Error reading file:', error);
     }
 }
 
 async function loadFromURL() {
+    console.log('🔗 Loading from URL...');
     const url = document.getElementById('urlInput').value.trim();
     
     if (!url) {
         appendOutput('<span class="warning">⚠️ Please enter a URL.</span>');
+        console.warn('❌ No URL provided');
         return;
     }
     
     if (!url.startsWith('http://') && !url.startsWith('https://')) {
         appendOutput('<span class="error">❌ URL must start with http:// or https://</span>');
+        console.warn('❌ Invalid URL format:', url);
         return;
     }
     
     try {
         appendOutput('<span class="info">⏳ Fetching code from URL...</span>');
+        console.log('📡 Fetching from:', url);
         
         const response = await fetch(url, {
             mode: 'cors',
@@ -1172,10 +1195,12 @@ async function loadFromURL() {
         
         document.getElementById('codeEditor').value = text;
         appendOutput(`<span class="success">✅ Loaded code from URL:\n${url}\nSize: ${(text.length / 1024).toFixed(2)} KB</span>`);
+        console.log('✅ Successfully loaded from URL');
         closeUploadModal();
         switchTab('output');
         
     } catch (error) {
+        console.error('❌ Error loading from URL:', error);
         appendOutput(`<span class="error">❌ Error loading from URL:\n${error.message}\n\n💡 Tip: The server must allow CORS requests. Some URLs may not work.</span>`);
     }
 }
