@@ -598,6 +598,7 @@ let isConnected = false;
 let activeTab = 'output';
 let terminalHistory = [];
 let historyIndex = -1;
+const textEncoder = new TextEncoder();
 
 // ─── Init ─────────────────────────────────────────────────────────
 function initializeApp() {
@@ -922,9 +923,7 @@ async function flashToESP32() {
         port.readable.pipeTo(textDecoder.writable);
         reader = textDecoder.readable.getReader();
 
-        const textEncoder = new TextEncoderStream();
-        textEncoder.readable.pipeTo(port.writable);
-        writer = textEncoder.writable.getWriter();
+        writer = port.writable.getWriter();
 
         readSerialData();
 
@@ -947,7 +946,7 @@ async function continueFlash() {
     }
 
     try {
-        await writer.write(code + '\n');
+        await writer.write(textEncoder.encode(code + '\n'));
         appendTerminal('>>> Code sent to device via serial.', 'success');
         appendOutput(`<span class="success">✅ Code transmitted to ESP32 via serial.\n(Note: Full OTA flash requires esptool.py or Arduino IDE.)</span>`);
     } catch (err) {
@@ -990,7 +989,7 @@ function escapeHtml(str) {
 }
 
 // ─── Terminal Input ───────────────────────────────────────────────
-function handleTerminalInput(event) {
+async function handleTerminalInput(event) {
     const input = document.getElementById('terminalInput');
     if (event.key === 'Enter') {
         sendTerminalCommand();
@@ -1014,7 +1013,7 @@ function handleTerminalInput(event) {
         document.getElementById('terminalOutput').textContent = '';
     } else if (event.ctrlKey && event.key === 'c') {
         // Send interrupt byte
-        if (writer) writer.write('\x03');
+        if (writer) await writer.write(new Uint8Array([0x03]));
         appendTerminal('^C', 'warning');
     }
 }
@@ -1036,7 +1035,7 @@ async function sendTerminalCommand() {
     }
 
     try {
-        await writer.write(cmd + '\r\n');
+        await writer.write(textEncoder.encode(cmd + '\r\n'));
     } catch (err) {
         appendTerminal(`Send error: ${err.message}`, 'error');
     }
@@ -1208,20 +1207,40 @@ async function loadFromURL() {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
         
-        const contentType = response.headers.get('content-type');
-        if (!contentType || (!contentType.includes('text') && !contentType.includes('plain'))) {
-            console.warn('Unexpected content type:', contentType);
+        const contentType = response.headers.get('content-type') || '';
+        const isBinaryUrl = url.toLowerCase().endsWith('.bin') || contentType.includes('application/octet-stream');
+
+        if (isBinaryUrl) {
+            const arrayBuffer = await response.arrayBuffer();
+            const uint8Array = new Uint8Array(arrayBuffer);
+            const hexString = Array.from(uint8Array)
+                .map(b => b.toString(16).padStart(2, '0'))
+                .join(' ');
+
+            window.binaryFileData = {
+                name: url.split('/').pop() || 'downloaded.bin',
+                size: uint8Array.length,
+                data: uint8Array,
+                hex: hexString.substring(0, 500) + (hexString.length > 500 ? '...' : '')
+            };
+
+            appendOutput(`<span class="success">✅ Binary file loaded from URL:\n${url}\n📊 Size: ${(uint8Array.length / 1024).toFixed(2)} KB\n🔧 Ready for flashing\n\n📝 Hex preview (first 500 chars):\n<code>${window.binaryFileData.hex}</code>\n\n<button class="btn btn-success" onclick="flashBinaryFile()" style="margin-top: 12px; width: 100%;">⚡ Flash Binary to ESP32</button></span>`);
+            console.log('✅ Successfully loaded binary from URL');
+        } else {
+            if (!contentType.includes('text') && !contentType.includes('plain') && !contentType.includes('application/javascript')) {
+                console.warn('Unexpected content type for code file:', contentType);
+            }
+
+            const text = await response.text();
+            if (!text || text.trim().length === 0) {
+                throw new Error('URL returned empty content');
+            }
+
+            document.getElementById('codeEditor').value = text;
+            appendOutput(`<span class="success">✅ Loaded code from URL:\n${url}\nSize: ${(text.length / 1024).toFixed(2)} KB</span>`);
+            console.log('✅ Successfully loaded from URL');
         }
-        
-        const text = await response.text();
-        
-        if (!text || text.trim().length === 0) {
-            throw new Error('URL returned empty content');
-        }
-        
-        document.getElementById('codeEditor').value = text;
-        appendOutput(`<span class="success">✅ Loaded code from URL:\n${url}\nSize: ${(text.length / 1024).toFixed(2)} KB</span>`);
-        console.log('✅ Successfully loaded from URL');
+
         closeUploadModal();
         switchTab('output');
         
